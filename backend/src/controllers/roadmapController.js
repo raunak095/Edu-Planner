@@ -1,5 +1,5 @@
-const Topic = require("../models/topic");
-const Roadmap = require("../models/roadmap");
+const Topic = require("../models/Topic");
+const Roadmap = require("../models/Roadmap");
 
 const generateRoadmap = async (req, res) => {
   try {
