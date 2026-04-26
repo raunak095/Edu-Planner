@@ -1,7 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
 import Navbar from "../components/Navbar";
-import API from "../api";
+import axios from "axios"; // ✅ ADDED
 import "../styles/auth.css";
 
 export default function Signup() {
@@ -19,21 +19,25 @@ export default function Signup() {
   };
 
   const sendOTP = async () => {
-    console.log("FORM DATA:", form); // 🔥 DEBUG
+    console.log("FORM DATA:", form);
 
-    // ✅ Prevent empty request
+    // Prevent empty request
     if (!form.name || !form.email || !form.password) {
       alert("Please fill all fields");
       return;
     }
 
     try {
-      const res = await API.post("/auth/register", {
-        name: form.name,
-        email: form.email,
-        password: form.password,
-        role
-      });
+      // ✅ DIRECT API CALL (FINAL FIX)
+      const res = await axios.post(
+        "https://edu-planner-backend.onrender.com/api/auth/register",
+        {
+          name: form.name,
+          email: form.email,
+          password: form.password,
+          role
+        }
+      );
 
       alert(res.data.message);
 
@@ -57,7 +61,7 @@ export default function Signup() {
             className="input"
             name="name"
             placeholder="Name"
-            value={form.name}              // ✅ ADDED
+            value={form.name}
             onChange={handleChange}
           />
 
@@ -65,7 +69,7 @@ export default function Signup() {
             className="input"
             name="email"
             placeholder="Email"
-            value={form.email}            // ✅ ADDED
+            value={form.email}
             onChange={handleChange}
           />
 
@@ -74,7 +78,7 @@ export default function Signup() {
             name="password"
             type="password"
             placeholder="Password"
-            value={form.password}         // ✅ ADDED
+            value={form.password}
             onChange={handleChange}
           />
 
