@@ -30,7 +30,7 @@ export default function Signup() {
     try {
       // ✅ DIRECT API CALL (FINAL FIX)
       const res = await axios.post(
-        "https://edu-planner-backend.onrender.com/api/auth/register",
+        "https://edu-planner-backrnd.onrender.com/api/auth/register",
         {
           name: form.name,
           email: form.email,
