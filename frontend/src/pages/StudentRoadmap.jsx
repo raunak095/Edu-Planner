@@ -8,7 +8,10 @@ export default function StudentRoadmap() {
   const [roadmap, setRoadmap] = useState(null);
   const [completed, setCompleted] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
   const [error, setError] = useState("");
+
+  const token = localStorage.getItem("token");
 
   // Auto-load subject from Subjects page
   useEffect(() => {
@@ -29,6 +32,31 @@ export default function StudentRoadmap() {
     localStorage.setItem("completed", JSON.stringify(completed));
   }, [completed]);
 
+  // Fetch latest roadmap from backend on mount
+  useEffect(() => {
+    const fetchRoadmap = async () => {
+      try {
+        const res = await API.get("/roadmap/my-roadmap", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        // API returns array sorted by latest first
+        if (res.data.roadmap && res.data.roadmap.length > 0) {
+          setRoadmap(res.data.roadmap[0]);
+        }
+      } catch (err) {
+        // 404 just means no roadmap yet — not a real error
+        if (err.response?.status !== 404) {
+          setError("Failed to load your existing roadmap.");
+        }
+      } finally {
+        setFetching(false);
+      }
+    };
+
+    fetchRoadmap();
+  }, [token]);
+
   const generateRoadmap = async () => {
     if (!subject.trim()) {
       setError("Please enter a subject.");
@@ -45,14 +73,12 @@ export default function StudentRoadmap() {
     setCompleted([]);
 
     try {
-      const token = localStorage.getItem("token");
-
       const res = await API.post(
         "/roadmap/generate-roadmap",
         {
           subject: subject.trim(),
           daysLeft: Number(daysLeft),
-          difficulty: "medium", // hardcoded for now
+          difficulty: "medium",
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -84,6 +110,17 @@ export default function StudentRoadmap() {
     if (total === 0) return 0;
     return Math.round((completed.length / total) * 100);
   };
+
+  if (fetching) {
+    return (
+      <DashboardLayout>
+        <h1>🗺 AI Study Roadmap</h1>
+        <div className="dashboard-card">
+          <p>Loading your roadmap...</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -136,6 +173,15 @@ export default function StudentRoadmap() {
             />
           </div>
           <p style={{ marginTop: "8px" }}>{getProgress()}% Completed</p>
+        </div>
+      )}
+
+      {/* NO ROADMAP STATE */}
+      {!roadmap && (
+        <div className="dashboard-card">
+          <p style={{ opacity: 0.6, textAlign: "center" }}>
+            No roadmap yet. Enter a subject and days above to generate one.
+          </p>
         </div>
       )}
 
