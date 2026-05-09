@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
+import API from "../api";
 
 export default function StudentRoadmap() {
   const [subject, setSubject] = useState("");
+  const [daysLeft, setDaysLeft] = useState("");
   const [roadmap, setRoadmap] = useState(null);
   const [completed, setCompleted] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  // ✅ Auto-load subject from Subjects page
+  // Auto-load subject from Subjects page
   useEffect(() => {
     const savedSubjects = JSON.parse(localStorage.getItem("subjects")) || [];
     if (savedSubjects.length > 0) {
@@ -14,108 +18,80 @@ export default function StudentRoadmap() {
     }
   }, []);
 
-  // ✅ Load roadmap + progress
+  // Load completed topics from localStorage
   useEffect(() => {
-    const savedRoadmap = JSON.parse(localStorage.getItem("roadmap"));
     const savedCompleted = JSON.parse(localStorage.getItem("completed"));
-
-    if (savedRoadmap) setRoadmap(savedRoadmap);
     if (savedCompleted) setCompleted(savedCompleted);
   }, []);
 
-  // ✅ Save to localStorage
+  // Persist completed state
   useEffect(() => {
-    if (roadmap) {
-      localStorage.setItem("roadmap", JSON.stringify(roadmap));
-      localStorage.setItem("completed", JSON.stringify(completed));
+    localStorage.setItem("completed", JSON.stringify(completed));
+  }, [completed]);
+
+  const generateRoadmap = async () => {
+    if (!subject.trim()) {
+      setError("Please enter a subject.");
+      return;
     }
-  }, [roadmap, completed]);
-
-  // ✅ Generate roadmap based on subject
-  const generateRoadmap = () => {
-    if (!subject.trim()) return;
-
-    let data;
-
-    if (subject.toLowerCase().includes("dbms")) {
-      data = {
-        high: ["Transactions", "Normalization", "SQL"],
-        medium: ["Indexing", "Joins"],
-        low: ["History of DBMS"],
-      };
-    } else if (subject.toLowerCase().includes("dsa")) {
-      data = {
-        high: ["Arrays", "Linked List", "Trees"],
-        medium: ["Graphs", "Recursion"],
-        low: ["Advanced Algorithms"],
-      };
-    } else {
-      data = {
-        high: ["Basics", "Core Concepts"],
-        medium: ["Practice Problems"],
-        low: ["Advanced Topics"],
-      };
+    if (!daysLeft || Number(daysLeft) <= 0) {
+      setError("Please enter a valid number of days.");
+      return;
     }
 
-    setRoadmap(data);
+    setError("");
+    setLoading(true);
+    setRoadmap(null);
     setCompleted([]);
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await API.post(
+        "/roadmap/generate-roadmap",
+        {
+          subject: subject.trim(),
+          daysLeft: Number(daysLeft),
+          difficulty: "medium", // hardcoded for now
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      setRoadmap(res.data.roadmap);
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to generate roadmap.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // ✅ Toggle completion
-  const toggleComplete = (topic) => {
+  const toggleComplete = (topicName) => {
     setCompleted((prev) =>
-      prev.includes(topic)
-        ? prev.filter((t) => t !== topic)
-        : [...prev, topic]
+      prev.includes(topicName)
+        ? prev.filter((t) => t !== topicName)
+        : [...prev, topicName]
     );
   };
 
-  // ✅ Progress calculation
   const getProgress = () => {
     if (!roadmap) return 0;
-
-    const total =
-      roadmap.high.length +
-      roadmap.medium.length +
-      roadmap.low.length;
-
+    const total = roadmap.plan.reduce(
+      (sum, day) => sum + day.topics.length,
+      0
+    );
+    if (total === 0) return 0;
     return Math.round((completed.length / total) * 100);
   };
-
-  // ✅ Render section
-  const renderSection = (title, items) => (
-    <div className="dashboard-card">
-      <h3>{title}</h3>
-
-      {items.map((item, i) => (
-        <div key={i}>
-          <input
-            type="checkbox"
-            checked={completed.includes(item)}
-            onChange={() => toggleComplete(item)}
-          />
-          <span
-            style={{
-              marginLeft: "10px",
-              textDecoration: completed.includes(item)
-                ? "line-through"
-                : "none",
-            }}
-          >
-            {item}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
 
   return (
     <DashboardLayout>
       <h1>🗺 AI Study Roadmap</h1>
 
-      {/* INPUT */}
+      {/* INPUT FORM */}
       <div className="dashboard-card">
-        <h3>🤖 Generate AI Roadmap</h3>
+        <h3>🤖 Generate Roadmap</h3>
 
         <input
           className="input"
@@ -124,8 +100,28 @@ export default function StudentRoadmap() {
           onChange={(e) => setSubject(e.target.value)}
         />
 
-        <button className="btn" onClick={generateRoadmap}>
-          Generate
+        <input
+          className="input"
+          type="number"
+          placeholder="Days left to study (e.g. 7)"
+          value={daysLeft}
+          onChange={(e) => setDaysLeft(e.target.value)}
+          style={{ marginTop: "10px" }}
+        />
+
+        {error && (
+          <p style={{ color: "red", marginTop: "8px", fontSize: "14px" }}>
+            {error}
+          </p>
+        )}
+
+        <button
+          className="btn"
+          onClick={generateRoadmap}
+          disabled={loading}
+          style={{ marginTop: "10px" }}
+        >
+          {loading ? "Generating..." : "Generate"}
         </button>
       </div>
 
@@ -133,18 +129,57 @@ export default function StudentRoadmap() {
       {roadmap && (
         <div className="dashboard-card">
           <h3>📊 Progress</h3>
-          <p>{getProgress()}% Completed</p>
+          <div className="progress-bar">
+            <div
+              className="progress-fill"
+              style={{ width: `${getProgress()}%` }}
+            />
+          </div>
+          <p style={{ marginTop: "8px" }}>{getProgress()}% Completed</p>
         </div>
       )}
 
-      {/* ROADMAP */}
-      {roadmap && (
-        <>
-          {renderSection("🔥 High Priority", roadmap.high)}
-          {renderSection("⚡ Medium Priority", roadmap.medium)}
-          {renderSection("📌 Low Priority", roadmap.low)}
-        </>
-      )}
+      {/* DAY-WISE PLAN */}
+      {roadmap &&
+        roadmap.plan.map((dayEntry) => (
+          <div className="dashboard-card" key={dayEntry.day}>
+            <h3>📅 Day {dayEntry.day}</h3>
+
+            {dayEntry.topics.length === 0 ? (
+              <p style={{ opacity: 0.6 }}>No topics scheduled.</p>
+            ) : (
+              dayEntry.topics.map((topic, i) => (
+                <div
+                  key={i}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    marginTop: "8px",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={completed.includes(topic.name)}
+                    onChange={() => toggleComplete(topic.name)}
+                  />
+                  <span
+                    style={{
+                      textDecoration: completed.includes(topic.name)
+                        ? "line-through"
+                        : "none",
+                    }}
+                  >
+                    {topic.name}
+                  </span>
+                  <span style={{ opacity: 0.6, fontSize: "13px" }}>
+                    ({topic.estimatedHours}h)
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        ))}
     </DashboardLayout>
   );
 }
