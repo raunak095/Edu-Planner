@@ -70,7 +70,7 @@ const registerUser = async (req, res) => {
       role,
       otp,
       otpExpiry,
-      isVerified: false,
+      isVerified: true,
     });
 
     console.log("👤 User created, sending OTP...");
