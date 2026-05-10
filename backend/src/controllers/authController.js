@@ -9,52 +9,97 @@ dotenv.config();
 // ================= EMAIL TRANSPORT =================
 const transporter = nodemailer.createTransport({
   service: "gmail",
+
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+
+  // ✅ FIXED TIMEOUT ISSUES
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
 });
 
 transporter.verify((error, success) => {
   if (error) {
-    console.error("❌ Email transporter error:", error);
+    console.error(
+      "❌ Email transporter error:",
+      error
+    );
   } else {
-    console.log("✅ Email transporter ready");
+    console.log(
+      "✅ Email transporter ready"
+    );
   }
 });
 
 // ================= OTP GENERATOR =================
 const generateOTP = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return Math.floor(
+    100000 + Math.random() * 900000
+  ).toString();
 };
 
 // ================= SEND EMAIL =================
-const sendOTPEmail = async (email, otp) => {
-  const info = await transporter.sendMail({
-    from: `"OTP Verification" <${process.env.EMAIL_USER}>`,
-    to: email,
-    subject: "OTP Verification",
-    text: `Your OTP is: ${otp}`,
-  });
+const sendOTPEmail = async (
+  email,
+  otp
+) => {
 
-  console.log("✅ OTP EMAIL SENT:", info.response);
+  const info =
+    await transporter.sendMail({
+
+      from:
+        `"OTP Verification" <${process.env.EMAIL_USER}>`,
+
+      to: email,
+
+      subject: "OTP Verification",
+
+      text: `Your OTP is: ${otp}`,
+    });
+
+  console.log(
+    "✅ OTP EMAIL SENT:",
+    info.response
+  );
 };
 
 // ================= REGISTER =================
-export const registerUser = async (req, res) => {
-  try {
-    const { name, email, password, role } = req.body;
+export const registerUser = async (
+  req,
+  res
+) => {
 
-    const existingUser = await User.findOne({ email });
+  try {
+
+    const {
+      name,
+      email,
+      password,
+      role,
+    } = req.body;
+
+    const existingUser =
+      await User.findOne({ email });
 
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+
+      return res.status(400).json({
+        message:
+          "User already exists",
+      });
+
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword =
+      await bcrypt.hash(password, 10);
 
     const otp = generateOTP();
-    const otpExpiry = Date.now() + 5 * 60 * 1000;
+
+    const otpExpiry =
+      Date.now() + 5 * 60 * 1000;
 
     const user = await User.create({
       name,
@@ -67,98 +112,211 @@ export const registerUser = async (req, res) => {
     });
 
     try {
-      await sendOTPEmail(email, otp);
+
+      await sendOTPEmail(
+        email,
+        otp
+      );
+
     } catch (error) {
-      await User.deleteOne({ email });
-      return res.status(500).json({
-        message: "Failed to send OTP email",
+
+      console.error(
+        "❌ EMAIL SEND ERROR:",
+        error
+      );
+
+      await User.deleteOne({
+        email,
       });
+
+      return res.status(500).json({
+        message:
+          "Failed to send OTP email",
+      });
+
     }
 
     return res.status(201).json({
-      message: "OTP sent successfully",
+      message:
+        "OTP sent successfully",
       email: user.email,
     });
 
   } catch (error) {
-    console.error("❌ REGISTER ERROR:", error);
-    return res.status(500).json({ message: "Server error" });
+
+    console.error(
+      "❌ REGISTER ERROR:",
+      error
+    );
+
+    return res.status(500).json({
+      message: "Server error",
+    });
+
   }
+
 };
 
 // ================= VERIFY OTP =================
-export const verifyOTP = async (req, res) => {
-  try {
-    const { email, otp } = req.body;
+export const verifyOTP = async (
+  req,
+  res
+) => {
 
-    const user = await User.findOne({ email });
+  try {
+
+    const { email, otp } =
+      req.body;
+
+    const user =
+      await User.findOne({
+        email,
+      });
 
     if (!user) {
-      return res.status(400).json({ message: "User not found" });
+
+      return res.status(400).json({
+        message: "User not found",
+      });
+
     }
 
-    if (user.otpExpiry < Date.now()) {
-      return res.status(400).json({ message: "OTP expired" });
+    if (
+      user.otpExpiry < Date.now()
+    ) {
+
+      return res.status(400).json({
+        message: "OTP expired",
+      });
+
     }
 
     if (user.otp !== otp) {
-      return res.status(400).json({ message: "Invalid OTP" });
+
+      return res.status(400).json({
+        message: "Invalid OTP",
+      });
+
     }
 
     user.isVerified = true;
+
     user.otp = null;
+
     user.otpExpiry = null;
 
     await user.save();
 
-    return res.json({ message: "Account verified successfully" });
+    return res.json({
+      message:
+        "Account verified successfully",
+    });
 
   } catch (error) {
-    console.error("❌ VERIFY ERROR:", error);
-    return res.status(500).json({ message: "Server error" });
+
+    console.error(
+      "❌ VERIFY ERROR:",
+      error
+    );
+
+    return res.status(500).json({
+      message: "Server error",
+    });
+
   }
+
 };
 
 // ================= LOGIN =================
-export const loginUser = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+export const loginUser = async (
+  req,
+  res
+) => {
 
-    const user = await User.findOne({ email });
+  try {
+
+    const { email, password } =
+      req.body;
+
+    const user =
+      await User.findOne({
+        email,
+      });
 
     if (!user) {
-      return res.status(400).json({ message: "User not found" });
+
+      return res.status(400).json({
+        message: "User not found",
+      });
+
     }
 
     if (!user.isVerified) {
-      return res.status(403).json({ message: "Verify OTP first" });
+
+      return res.status(403).json({
+        message:
+          "Verify OTP first",
+      });
+
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch =
+      await bcrypt.compare(
+        password,
+        user.password
+      );
 
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
+
+      return res.status(400).json({
+        message:
+          "Invalid credentials",
+      });
+
     }
 
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+
+      {
+        id: user._id,
+        role: user.role,
+      },
+
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+
+      {
+        expiresIn: "1d",
+      }
+
     );
 
     return res.json({
-      message: "Login successful",
+
+      message:
+        "Login successful",
+
       token,
+
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
       },
+
     });
 
   } catch (error) {
-    console.error("❌ LOGIN ERROR:", error);
-    return res.status(500).json({ message: "Server error" });
+
+    console.error(
+      "❌ LOGIN ERROR:",
+      error
+    );
+
+    return res.status(500).json({
+      message: "Server error",
+    });
+
   }
+
 };
