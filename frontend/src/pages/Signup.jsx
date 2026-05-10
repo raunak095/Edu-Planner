@@ -73,7 +73,8 @@ export default function Signup() {
         }
       );
 
-      alert(res.data.message);
+      // ✅ SHOW OTP DIRECTLY
+      alert(`Your OTP is: ${res.data.otp}`);
 
       navigate("/otp", {
 

@@ -9,41 +9,43 @@ dotenv.config();
 // ================= EMAIL TRANSPORT =================
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
+
   port: 465,
+
   secure: true,
 
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  /*tls: {
-    rejectUnauthorized: false,
-  },*/
-
-  // ✅ FIXED TIMEOUT ISSUES
-  /*connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000,*/
 });
 
 transporter.verify((error, success) => {
+
   if (error) {
+
     console.error(
       "❌ Email transporter error:",
       error
     );
+
   } else {
+
     console.log(
       "✅ Email transporter ready"
     );
+
   }
+
 });
 
 // ================= OTP GENERATOR =================
 const generateOTP = () => {
+
   return Math.floor(
     100000 + Math.random() * 900000
   ).toString();
+
 };
 
 // ================= SEND EMAIL =================
@@ -63,12 +65,14 @@ const sendOTPEmail = async (
       subject: "OTP Verification",
 
       text: `Your OTP is: ${otp}`,
+
     });
 
   console.log(
     "✅ OTP EMAIL SENT:",
     info.response
   );
+
 };
 
 // ================= REGISTER =================
@@ -107,6 +111,7 @@ export const registerUser = async (
       Date.now() + 5 * 60 * 1000;
 
     const user = await User.create({
+
       name,
       email,
       password: hashedPassword,
@@ -114,37 +119,24 @@ export const registerUser = async (
       otp,
       otpExpiry,
       isVerified: false,
+
     });
 
-    try {
-
-      await sendOTPEmail(
-        email,
-        otp
-      );
-
-    } catch (error) {
-
-      console.error(
-        "❌ EMAIL SEND ERROR:",
-        error
-      );
-
-      await User.deleteOne({
-        email,
-      });
-
-      return res.status(500).json({
-        message:
-          "Failed to send OTP email",
-      });
-
-    }
+    // ✅ TEMPORARY OTP DIRECT RESPONSE
+    console.log(
+      "✅ GENERATED OTP:",
+      otp
+    );
 
     return res.status(201).json({
+
       message:
-        "OTP sent successfully",
+        "OTP generated successfully",
+
       email: user.email,
+
+      otp,
+
     });
 
   } catch (error) {
