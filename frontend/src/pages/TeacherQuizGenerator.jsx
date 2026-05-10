@@ -1,13 +1,17 @@
 import { useState } from "react";
+
 import DashboardLayout from "../layouts/DashboardLayout";
 
 export default function TeacherQuizGenerator() {
 
   const [topic, setTopic] = useState("");
+
   const [quiz, setQuiz] = useState([]);
+
   const [loading, setLoading] = useState(false);
 
-  // 🤖 GENERATE QUIZ
+  // ================= GENERATE QUIZ =================
+
   const generateQuiz = async () => {
 
     if (!topic.trim()) return;
@@ -17,7 +21,7 @@ export default function TeacherQuizGenerator() {
       setLoading(true);
 
       const response = await fetch(
-        "http://localhost:5000/api/ai/generate-quiz",
+        "https://edu-planner-backrnd.onrender.com/api/ai/generate-quiz",
         {
           method: "POST",
 
@@ -36,7 +40,9 @@ export default function TeacherQuizGenerator() {
       console.log(data);
 
       if (data.success) {
+
         setQuiz(data.quiz);
+
       }
 
     } catch (error) {
@@ -50,16 +56,19 @@ export default function TeacherQuizGenerator() {
       setLoading(false);
 
     }
+
   };
 
   return (
+
     <DashboardLayout role="teacher">
 
       <h1 className="page-title">
         🤖 AI Quiz Generator
       </h1>
 
-      {/* INPUT SECTION */}
+      {/* ================= INPUT SECTION ================= */}
+
       <div className="card">
 
         <div
@@ -80,18 +89,24 @@ export default function TeacherQuizGenerator() {
             className="btn"
             onClick={generateQuiz}
           >
-            {loading ? "Generating..." : "Generate Quiz"}
+            {loading
+              ? "Generating..."
+              : "Generate Quiz"}
           </button>
 
         </div>
+
       </div>
 
-      {/* QUIZ SECTION */}
+      {/* ================= QUIZ SECTION ================= */}
+
       {quiz.length > 0 && (
 
         <div
           className="card"
-          style={{ marginTop: "20px" }}
+          style={{
+            marginTop: "20px",
+          }}
         >
 
           <h2>📝 Generated Quiz</h2>
@@ -144,5 +159,6 @@ export default function TeacherQuizGenerator() {
       )}
 
     </DashboardLayout>
+
   );
 }

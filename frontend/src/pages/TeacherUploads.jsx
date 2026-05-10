@@ -23,7 +23,8 @@ export default function TeacherUploads() {
   // ✅ Success State
   const [success, setSuccess] = useState("");
 
-  // 🚀 Fetch Uploaded Notes
+  // ================= FETCH NOTES =================
+
   const fetchNotes = async () => {
 
     try {
@@ -53,7 +54,8 @@ export default function TeacherUploads() {
 
   };
 
-  // 📤 Upload Note
+  // ================= UPLOAD NOTE =================
+
   const handleUpload = async (e) => {
 
     e.preventDefault();
@@ -77,7 +79,7 @@ export default function TeacherUploads() {
 
       setLoading(true);
 
-      // 📦 FormData for file upload
+      // 📦 FormData
       const formData = new FormData();
 
       formData.append(
@@ -105,13 +107,13 @@ export default function TeacherUploads() {
 
       );
 
-      // ✅ Update UI Instantly
+      // ✅ Update UI instantly
       setNotes([
         response.data,
         ...notes,
       ]);
 
-      // ✅ Reset Form
+      // ✅ Reset form
       setTitle("");
 
       setFile(null);
@@ -139,7 +141,8 @@ export default function TeacherUploads() {
 
   };
 
-  // ❌ Delete Note
+  // ================= DELETE NOTE =================
+
   const handleDelete = async (id) => {
 
     const confirmDelete =
@@ -184,7 +187,8 @@ export default function TeacherUploads() {
 
   };
 
-  // 🚀 Initial Fetch
+  // ================= INITIAL FETCH =================
+
   useEffect(() => {
 
     fetchNotes();
@@ -195,13 +199,13 @@ export default function TeacherUploads() {
 
     <DashboardLayout role="teacher">
 
-      {/* 📂 PAGE TITLE */}
+      {/* ================= PAGE TITLE ================= */}
 
       <h1 className="page-title">
         📂 Upload Notes
       </h1>
 
-      {/* 📤 UPLOAD FORM */}
+      {/* ================= UPLOAD FORM ================= */}
 
       <div
         className="card"
@@ -263,7 +267,7 @@ export default function TeacherUploads() {
 
         >
 
-          {/* 📄 NOTE TITLE */}
+          {/* 📄 TITLE */}
 
           <input
             type="text"
@@ -275,7 +279,7 @@ export default function TeacherUploads() {
             className="input"
           />
 
-          {/* 📎 FILE INPUT */}
+          {/* 📎 FILE */}
 
           <input
             type="file"
@@ -287,7 +291,7 @@ export default function TeacherUploads() {
             className="input"
           />
 
-          {/* 📤 SUBMIT BUTTON */}
+          {/* 📤 BUTTON */}
 
           <button
             type="submit"
@@ -305,7 +309,7 @@ export default function TeacherUploads() {
 
       </div>
 
-      {/* 📋 UPLOADED NOTES */}
+      {/* ================= NOTES LIST ================= */}
 
       <div
         style={{
@@ -321,10 +325,12 @@ export default function TeacherUploads() {
 
         {loading &&
           notes.length === 0 && (
-            <p>
-              Loading uploaded notes...
-            </p>
-          )}
+
+          <p>
+            Loading uploaded notes...
+          </p>
+
+        )}
 
         {/* ❌ EMPTY */}
 
@@ -357,7 +363,7 @@ export default function TeacherUploads() {
             {/* 📎 FILE LINK */}
 
             <a
-              href={`http://localhost:5000${note.fileUrl}`}
+              href={`https://edu-planner-backrnd.onrender.com${note.fileUrl}`}
               target="_blank"
               rel="noopener noreferrer"
               style={{
@@ -382,7 +388,6 @@ export default function TeacherUploads() {
             >
 
               Uploaded:
-
               {" "}
 
               {new Date(
@@ -391,7 +396,7 @@ export default function TeacherUploads() {
 
             </p>
 
-            {/* ❌ DELETE BUTTON */}
+            {/* ❌ DELETE */}
 
             <button
               className="btn"
