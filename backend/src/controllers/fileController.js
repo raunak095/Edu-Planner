@@ -2,6 +2,7 @@ const File = require("../models/File");
 const path = require("path");
 
 // ================= UPLOAD FILE TO MONGODB =================
+// This function handles file uploads and stores them directly in MongoDB as binary data
 const uploadFile = async (req, res) => {
   try {
     if (!req.file) {
@@ -46,6 +47,7 @@ const uploadFile = async (req, res) => {
 };
 
 // ================= GET ALL FILES (Metadata Only) =================
+// This function retrieves all file records without the binary data for listing purposes
 const getAllFiles = async (req, res) => {
   try {
     const files = await File.find().select("-fileData").sort({ createdAt: -1 });
@@ -61,6 +63,7 @@ const getAllFiles = async (req, res) => {
 };
 
 // ================= GET FILE BY ID (Metadata Only) =================
+// This function retrieves a single file record by ID without the binary data
 const getFileById = async (req, res) => {
   try {
     const file = await File.findById(req.params.id).select("-fileData");
@@ -78,6 +81,7 @@ const getFileById = async (req, res) => {
 };
 
 // ================= DOWNLOAD FILE FROM MONGODB =================
+// This function allows users to download the raw file content stored in MongoDB
 const downloadFile = async (req, res) => {
   try {
     const file = await File.findById(req.params.id);
@@ -96,6 +100,7 @@ const downloadFile = async (req, res) => {
 };
 
 // ================= DELETE FILE FROM MONGODB =================
+// This function deletes a file record from MongoDB by its ID
 const deleteFile = async (req, res) => {
   try {
     const file = await File.findByIdAndDelete(req.params.id);
@@ -115,6 +120,7 @@ const deleteFile = async (req, res) => {
 };
 
 // ================= GET FILES BY USER =================
+// This function retrieves all files uploaded by a specific user (identified by email or ID)
 const getFilesByUser = async (req, res) => {
   try {
     const { uploadedBy } = req.params;
@@ -132,6 +138,7 @@ const getFilesByUser = async (req, res) => {
 };
 
 // ================= GET FILES BY ROLE =================
+// This function retrieves all files associated with a specific role (student, teacher, admin)
 const getFilesByRole = async (req, res) => {
   try {
     const { role } = req.params;
@@ -149,6 +156,7 @@ const getFilesByRole = async (req, res) => {
 };
 
 // ================= PREVIEW FILE (View in Browser) =================
+// This function allows users to preview the file in the browser when supported (e.g., PDFs, TXT)
 const previewFile = async (req, res) => {
   try {
     const file = await File.findById(req.params.id);

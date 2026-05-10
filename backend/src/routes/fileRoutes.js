@@ -12,28 +12,29 @@ const {
   previewFile
 } = require("../controllers/fileController");
 
-// Upload file to MongoDB
+// Upload a single file to MongoDB
+// The request must be multipart/form-data, with the file field named "file"
 router.post("/upload", upload.single("file"), uploadFile);
 
-// Get all files (metadata only)
+// Retrieve metadata for all uploaded files
 router.get("/", getAllFiles);
 
-// Get file by ID (metadata only)
+// Retrieve metadata for a single file by its MongoDB ID
 router.get("/:id", getFileById);
 
-// Download file from MongoDB
+// Download the raw file content
 router.get("/download/:id", downloadFile);
 
-// Preview file in browser
+// Preview the file in the browser when supported
 router.get("/preview/:id", previewFile);
 
-// Delete file from MongoDB
+// Delete a file by its MongoDB ID
 router.delete("/:id", deleteFile);
 
-// Get files by user email
+// Retrieve files uploaded by a specific user
 router.get("/user/:uploadedBy", getFilesByUser);
 
-// Get files by role
+// Retrieve files associated with a specific role
 router.get("/role/:role", getFilesByRole);
 
 module.exports = router;

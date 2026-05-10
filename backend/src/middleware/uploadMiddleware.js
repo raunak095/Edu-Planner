@@ -12,9 +12,13 @@ const fileFilter = (req, file, cb) => {
     "text/plain"
   ];
 
+  // Also check file extension for extra safety
   const allowedExtensions = [".pdf", ".docx", ".txt"];
+
+  // Get the file extension
   const fileExt = path.extname(file.originalname).toLowerCase();
 
+  // Check MIME type and file extension
   if (allowedMimes.includes(file.mimetype) || allowedExtensions.includes(fileExt)) {
     cb(null, true);
   } else {
