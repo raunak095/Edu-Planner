@@ -1,4 +1,8 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+} from "react-router-dom";
 
 import RoleSelect from "./pages/RoleSelect";
 import Login from "./pages/Login";
@@ -14,24 +18,62 @@ import StudentRoadmap from "./pages/StudentRoadmap";
 import StudentAnnouncements from "./pages/StudentAnnouncements";
 import StudentSettings from "./pages/StudentSettings";
 
-import ProtectedRoute from "./utils/ProtectedRoute";
+/* ================= TEACHER PAGES ================= */
+
+import TeacherQuizGenerator from "./pages/TeacherQuizGenerator";
+import TeacherCourses from "./pages/TeacherCourses";
+import TeacherUploads from "./pages/TeacherUploads";
+import TeacherAnnouncements from "./pages/TeacherAnnouncements";
+
+/* ================= ADMIN PAGES ================= */
+
+import AdminStudents from "./pages/AdminStudents";
+import AdminCourses from "./pages/AdminCourses";
+import AdminTeachers from "./pages/AdminTeachers";
+import AdminSettings from "./pages/AdminSettings";
+
+/* ================= PROTECTED ROUTE ================= */
+
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
+
   return (
+
     <BrowserRouter>
+
       <Routes>
 
-        {/* PUBLIC ROUTES */}
-        <Route path="/" element={<RoleSelect />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/otp" element={<OTPVerify />} />
+        {/* ================= PUBLIC ROUTES ================= */}
 
-        {/* STUDENT ROUTES */}
         <Route
-          path="/student"
+          path="/"
+          element={<RoleSelect />}
+        />
+
+        <Route
+          path="/login"
+          element={<Login />}
+        />
+
+        <Route
+          path="/signup"
+          element={<Signup />}
+        />
+
+        <Route
+          path="/otp"
+          element={<OTPVerify />}
+        />
+
+        {/* ================= STUDENT ROUTES ================= */}
+
+        <Route
+          path="/student/dashboard"
           element={
-            <ProtectedRoute allowedRoles={["student"]}>
+            <ProtectedRoute
+              allowedRole="student"
+            >
               <StudentDashboard />
             </ProtectedRoute>
           }
@@ -40,7 +82,9 @@ function App() {
         <Route
           path="/student/subjects"
           element={
-            <ProtectedRoute allowedRoles={["student"]}>
+            <ProtectedRoute
+              allowedRole="student"
+            >
               <StudentSubjects />
             </ProtectedRoute>
           }
@@ -49,7 +93,9 @@ function App() {
         <Route
           path="/student/roadmap"
           element={
-            <ProtectedRoute allowedRoles={["student"]}>
+            <ProtectedRoute
+              allowedRole="student"
+            >
               <StudentRoadmap />
             </ProtectedRoute>
           }
@@ -58,7 +104,9 @@ function App() {
         <Route
           path="/student/announcements"
           element={
-            <ProtectedRoute allowedRoles={["student"]}>
+            <ProtectedRoute
+              allowedRole="student"
+            >
               <StudentAnnouncements />
             </ProtectedRoute>
           }
@@ -67,33 +115,130 @@ function App() {
         <Route
           path="/student/settings"
           element={
-            <ProtectedRoute allowedRoles={["student"]}>
+            <ProtectedRoute
+              allowedRole="student"
+            >
               <StudentSettings />
             </ProtectedRoute>
           }
         />
 
-        {/* TEACHER ROUTE */}
+        {/* ================= TEACHER ROUTES ================= */}
+
         <Route
-          path="/teacher"
+          path="/teacher/dashboard"
           element={
-            <ProtectedRoute allowedRoles={["teacher"]}>
+            <ProtectedRoute
+              allowedRole="teacher"
+            >
               <TeacherDashboard />
             </ProtectedRoute>
           }
         />
 
-        {/* ADMIN ROUTE */}
         <Route
-          path="/admin"
+          path="/teacher/quiz-generator"
           element={
-            <ProtectedRoute allowedRoles={["admin"]}>
+            <ProtectedRoute
+              allowedRole="teacher"
+            >
+              <TeacherQuizGenerator />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/teacher/courses"
+          element={
+            <ProtectedRoute
+              allowedRole="teacher"
+            >
+              <TeacherCourses />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/teacher/uploads"
+          element={
+            <ProtectedRoute
+              allowedRole="teacher"
+            >
+              <TeacherUploads />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/teacher/announcements"
+          element={
+            <ProtectedRoute
+              allowedRole="teacher"
+            >
+              <TeacherAnnouncements />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ================= ADMIN ROUTES ================= */}
+
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute
+              allowedRole="admin"
+            >
               <AdminDashboard />
             </ProtectedRoute>
           }
         />
 
+        <Route
+          path="/admin/students"
+          element={
+            <ProtectedRoute
+              allowedRole="admin"
+            >
+              <AdminStudents />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/courses"
+          element={
+            <ProtectedRoute
+              allowedRole="admin"
+            >
+              <AdminCourses />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/teachers"
+          element={
+            <ProtectedRoute
+              allowedRole="admin"
+            >
+              <AdminTeachers />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/settings"
+          element={
+            <ProtectedRoute
+              allowedRole="admin"
+            >
+              <AdminSettings />
+            </ProtectedRoute>
+          }
+        />
+
       </Routes>
+
     </BrowserRouter>
   );
 }

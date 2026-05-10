@@ -14,20 +14,37 @@ export default function RoleSelect() {
         <p>Select your role</p>
 
         <div className="roles">
-          <div className="card" onClick={() => navigate("/signup?role=student")}>
-            🎓 <h3>Student</h3>
+
+          {/* 🎓 STUDENT */}
+          <div
+            className="card"
+            onClick={() => navigate("/student/dashboard")}
+          >
+            🎓
+            <h3>Student</h3>
             <p>Study roadmap</p>
           </div>
 
-          <div className="card" onClick={() => navigate("/signup?role=teacher")}>
-            👨‍🏫 <h3>Teacher</h3>
+          {/* 👨‍🏫 TEACHER */}
+          <div
+            className="card"
+            onClick={() => navigate("/teacher/dashboard")}
+          >
+            👨‍🏫
+            <h3>Teacher</h3>
             <p>Upload resources</p>
           </div>
 
-          <div className="card" onClick={() => navigate("/signup?role=admin")}>
-            🛠 <h3>Admin</h3>
+          {/* 🛠 ADMIN */}
+          <div
+            className="card"
+            onClick={() => navigate("/admin/dashboard")}
+          >
+            🛠
+            <h3>Admin</h3>
             <p>Manage system</p>
           </div>
+
         </div>
       </div>
     </>

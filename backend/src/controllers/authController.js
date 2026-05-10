@@ -1,20 +1,20 @@
-const User = require("../models/User");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
-const nodemailer = require("nodemailer");
+import User from "../models/User.js";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
 
-require("dotenv").config();
+dotenv.config();
 
-// ================= EMAIL TRANSPORT (FIXED) =================
+// ================= EMAIL TRANSPORT =================
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS, // MUST be Gmail App Password
+    pass: process.env.EMAIL_PASS,
   },
 });
 
-// Verify transporter on startup (important for debugging)
 transporter.verify((error, success) => {
   if (error) {
     console.error("❌ Email transporter error:", error);
@@ -30,25 +30,18 @@ const generateOTP = () => {
 
 // ================= SEND EMAIL =================
 const sendOTPEmail = async (email, otp) => {
-  try {
-    console.log("📨 Sending OTP to:", email);
+  const info = await transporter.sendMail({
+    from: `"OTP Verification" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: "OTP Verification",
+    text: `Your OTP is: ${otp}`,
+  });
 
-    const info = await transporter.sendMail({
-      from: `"OTP Verification" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: "OTP Verification",
-      text: `Your OTP is: ${otp}`,
-    });
-
-    console.log("✅ OTP EMAIL SENT:", info.response);
-  } catch (error) {
-    console.error("❌ EMAIL SEND FAILED:", error);
-    throw error;
-  }
+  console.log("✅ OTP EMAIL SENT:", info.response);
 };
 
 // ================= REGISTER =================
-const registerUser = async (req, res) => {
+export const registerUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
@@ -70,39 +63,31 @@ const registerUser = async (req, res) => {
       role,
       otp,
       otpExpiry,
-      isVerified: true,
+      isVerified: false,
     });
-
-    console.log("👤 User created, sending OTP...");
 
     try {
       await sendOTPEmail(email, otp);
-    } catch (emailError) {
-      console.log("❌ Email failed, deleting user...");
-
+    } catch (error) {
       await User.deleteOne({ email });
-
       return res.status(500).json({
-        message: "Failed to send OTP email. Try again.",
+        message: "Failed to send OTP email",
       });
     }
 
     return res.status(201).json({
-      message: "OTP sent successfully. Please verify your email.",
+      message: "OTP sent successfully",
       email: user.email,
     });
 
   } catch (error) {
     console.error("❌ REGISTER ERROR:", error);
-
-    return res.status(500).json({
-      message: "Server error",
-    });
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
 // ================= VERIFY OTP =================
-const verifyOTP = async (req, res) => {
+export const verifyOTP = async (req, res) => {
   try {
     const { email, otp } = req.body;
 
@@ -130,15 +115,12 @@ const verifyOTP = async (req, res) => {
 
   } catch (error) {
     console.error("❌ VERIFY ERROR:", error);
-
-    return res.status(500).json({
-      message: "Server error",
-    });
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
 // ================= LOGIN =================
-const loginUser = async (req, res) => {
+export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -149,7 +131,7 @@ const loginUser = async (req, res) => {
     }
 
     if (!user.isVerified) {
-      return res.status(403).json({ message: "Please verify OTP first" });
+      return res.status(403).json({ message: "Verify OTP first" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -177,15 +159,6 @@ const loginUser = async (req, res) => {
 
   } catch (error) {
     console.error("❌ LOGIN ERROR:", error);
-
-    return res.status(500).json({
-      message: "Server error",
-    });
+    return res.status(500).json({ message: "Server error" });
   }
-};
-
-module.exports = {
-  registerUser,
-  loginUser,
-  verifyOTP,
 };

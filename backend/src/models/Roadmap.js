@@ -1,61 +1,62 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-const roadmapSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true
-  },
+const roadmapSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
 
-  subject: {
-    type: String,
-    required: true
-  },
+    subject: {
+      type: String,
+      required: true,
+    },
 
-  daysLeft: {
-    type: Number,
-    required: true
-  },
+    daysLeft: {
+      type: Number,
+      required: true,
+    },
 
-  difficulty: {
-    type: String,
-    enum: ["easy", "medium", "hard"],
-    default: "medium"
-  },
+    difficulty: {
+      type: String,
+      enum: ["easy", "medium", "hard"],
+      default: "medium",
+    },
 
-  // GENERATED PLAN
-  plan: [
-    {
-      day: Number,
+    // GENERATED PLAN
+    plan: [
+      {
+        day: Number,
 
-      topics: [
-        {
-          topicId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Topic"
+        topics: [
+          {
+            topicId: {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: "Topic",
+            },
+
+            name: String,
+
+            estimatedHours: Number,
+
+            status: {
+              type: String,
+              enum: ["pending", "completed", "skipped"],
+              default: "pending",
+            },
           },
+        ],
+      },
+    ],
 
-          // redundancy for quick display
-          name: String,
+    // overall tracking
+    progress: {
+      completedTopics: { type: Number, default: 0 },
+      totalTopics: { type: Number, default: 0 },
+    },
+  },
+  { timestamps: true }
+);
 
-          estimatedHours: Number,
-
-          status: {
-            type: String,
-            enum: ["pending", "completed", "skipped"],
-            default: "pending"
-          }
-        }
-      ]
-    }
-  ],
-
-  // overall tracking
-  progress: {
-    completedTopics: { type: Number, default: 0 },
-    totalTopics: { type: Number, default: 0 }
-  }
-
-}, { timestamps: true });
-
-module.exports = mongoose.model("Roadmap", roadmapSchema);
+export default mongoose.model("Roadmap", roadmapSchema);

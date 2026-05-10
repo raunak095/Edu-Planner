@@ -8,9 +8,16 @@ export default function StudentSubjects() {
   const [editIndex, setEditIndex] = useState(null);
   const [editValue, setEditValue] = useState("");
 
-  // 🔍 New states
+  // 🔍 Search + Filter
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+
+  // 🤖 AI Quiz States
+  const [quizTopic, setQuizTopic] = useState("");
+  const [quiz, setQuiz] = useState([]);
+  const [loadingQuiz, setLoadingQuiz] = useState(false);
+  const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [score, setScore] = useState(null);
 
   // Load from localStorage
   useEffect(() => {
@@ -30,11 +37,18 @@ export default function StudentSubjects() {
     localStorage.setItem("subjects", JSON.stringify(subjects));
   }, [subjects]);
 
-  // ➕ Add
+  // ➕ Add Subject
   const addSubject = () => {
     if (!subject.trim()) return;
 
-    setSubjects([...subjects, { name: subject, completed: false }]);
+    setSubjects([
+      ...subjects,
+      {
+        name: subject,
+        completed: false,
+      },
+    ]);
+
     setSubject("");
   };
 
@@ -64,7 +78,7 @@ export default function StudentSubjects() {
     setSubjects(updated);
   };
 
-  // 🔍 Filter logic
+  // 🔍 Filter
   const filteredSubjects = subjects
     .filter((s) =>
       s.name.toLowerCase().includes(search.toLowerCase())
@@ -75,11 +89,60 @@ export default function StudentSubjects() {
       return true;
     });
 
+  // 🤖 Generate Quiz
+  const generateQuiz = async () => {
+    if (!quizTopic.trim()) return;
+
+    try {
+      setLoadingQuiz(true);
+
+      const response = await fetch(
+        "http://localhost:5000/api/ai/generate-quiz",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            topic: quizTopic,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        setQuiz(data.quiz);
+        setSelectedAnswers({});
+        setScore(null);
+      }
+
+    } catch (error) {
+      console.log(error);
+      alert("Quiz generation failed");
+    } finally {
+      setLoadingQuiz(false);
+    }
+  };
+
+  // 🎯 Submit Quiz
+  const submitQuiz = () => {
+    let correct = 0;
+
+    quiz.forEach((q, index) => {
+      if (selectedAnswers[index] === q.answer) {
+        correct++;
+      }
+    });
+
+    setScore(correct);
+  };
+
   return (
     <DashboardLayout>
       <h1 className="page-title">📚 My Subjects</h1>
 
-      {/* ➕ ADD */}
+      {/* ➕ ADD SUBJECT */}
       <div className="card">
         <div style={{ display: "flex", gap: "10px" }}>
           <input
@@ -116,12 +179,13 @@ export default function StudentSubjects() {
       {/* 📊 STATS */}
       <div className="card" style={{ display: "flex", gap: "20px" }}>
         <span>📚 Total: {subjects.length}</span>
+
         <span>
           ✅ Completed: {subjects.filter((s) => s.completed).length}
         </span>
       </div>
 
-      {/* 📋 LIST */}
+      {/* 📋 SUBJECT LIST */}
       <div className="card">
         <h3>Your Subjects</h3>
 
@@ -203,6 +267,80 @@ export default function StudentSubjects() {
           ))
         )}
       </div>
+
+      {/* 🤖 AI QUIZ GENERATOR */}
+      <div className="card" style={{ marginTop: "20px" }}>
+        <h2>🤖 AI Quiz Generator</h2>
+
+        <div style={{ display: "flex", gap: "10px" }}>
+          <input
+            className="input"
+            placeholder="Enter topic (e.g. DBMS)"
+            value={quizTopic}
+            onChange={(e) => setQuizTopic(e.target.value)}
+          />
+
+          <button className="btn" onClick={generateQuiz}>
+            {loadingQuiz ? "Generating..." : "Generate Quiz"}
+          </button>
+        </div>
+      </div>
+
+      {/* 📝 QUIZ */}
+      {quiz.length > 0 && (
+        <div className="card" style={{ marginTop: "20px" }}>
+          <h2>📝 Quiz</h2>
+
+          {quiz.map((q, index) => (
+            <div
+              key={index}
+              style={{
+                marginBottom: "25px",
+                padding: "15px",
+                border: "1px solid #ddd",
+                borderRadius: "10px",
+              }}
+            >
+              <h3>
+                {index + 1}. {q.question}
+              </h3>
+
+              {q.options.map((option, i) => (
+                <div key={i} style={{ marginTop: "10px" }}>
+                  <label>
+                    <input
+                      type="radio"
+                      name={`question-${index}`}
+                      value={option}
+                      checked={selectedAnswers[index] === option}
+                      onChange={() =>
+                        setSelectedAnswers({
+                          ...selectedAnswers,
+                          [index]: option,
+                        })
+                      }
+                    />
+
+                    <span style={{ marginLeft: "8px" }}>
+                      {option}
+                    </span>
+                  </label>
+                </div>
+              ))}
+            </div>
+          ))}
+
+          <button className="btn" onClick={submitQuiz}>
+            Submit Quiz
+          </button>
+
+          {score !== null && (
+            <h2 style={{ marginTop: "20px" }}>
+              🎯 Score: {score} / {quiz.length}
+            </h2>
+          )}
+        </div>
+      )}
     </DashboardLayout>
   );
 }

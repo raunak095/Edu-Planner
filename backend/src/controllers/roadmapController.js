@@ -1,7 +1,8 @@
-const Topic = require("../models/Topic");
-const Roadmap = require("../models/Roadmap");
+import Topic from "../models/Topic.js";
+import Roadmap from "../models/Roadmap.js";
 
-const generateRoadmap = async (req, res) => {
+// ================= GENERATE ROADMAP =================
+export const generateRoadmap = async (req, res) => {
   try {
     const { subject, daysLeft, difficulty } = req.body;
     const userId = req.user.id;
@@ -12,16 +13,16 @@ const generateRoadmap = async (req, res) => {
 
     // Fetch topics
     let topics = await Topic.find({
-      subject: new RegExp(`^${subject}$`, "i")
+      subject: new RegExp(`^${subject}$`, "i"),
     });
 
     if (!topics.length) {
       return res.status(404).json({
-      message: "No topics found for this subject. Please add topics first."
-    });
-}
+        message: "No topics found for this subject. Please add topics first.",
+      });
+    }
 
-    // Sort by priorityScore (better than string priority)
+    // Sort by priorityScore
     topics.sort((a, b) => (b.priorityScore || 0) - (a.priorityScore || 0));
 
     // Decide hours per day
@@ -44,7 +45,7 @@ const generateRoadmap = async (req, res) => {
           dayTopics.push({
             topicId: topic._id || null,
             name: topic.name || topic,
-            estimatedHours: hours
+            estimatedHours: hours,
           });
 
           remainingHours -= hours;
@@ -62,12 +63,12 @@ const generateRoadmap = async (req, res) => {
       subject,
       daysLeft,
       difficulty,
-      plan
+      plan,
     });
 
     res.status(201).json({
       message: "Roadmap generated",
-      roadmap
+      roadmap,
     });
 
   } catch (err) {
@@ -75,7 +76,8 @@ const generateRoadmap = async (req, res) => {
   }
 };
 
-const getMyRoadmap = async (req, res) => {
+// ================= GET ROADMAP =================
+export const getMyRoadmap = async (req, res) => {
   try {
     const userId = req.user.id;
 
@@ -90,9 +92,4 @@ const getMyRoadmap = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-};
-
-module.exports = {
-  generateRoadmap,
-  getMyRoadmap
 };

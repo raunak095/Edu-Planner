@@ -1,13 +1,20 @@
-const express = require("express");
+import express from "express";
+
+import {
+  generateRoadmap,
+  getMyRoadmap
+} from "../controllers/roadmapController.js";
+
+import { protect } from "../middleware/authMiddleware.js";
+
 const router = express.Router();
 
-const { generateRoadmap, getMyRoadmap } = require("../controllers/roadmapController");
-const { authMiddleware } = require("../middleware/authMiddleware");
+// ================= ROUTES =================
+
 // Generate roadmap (protected)
-router.post("/generate-roadmap", authMiddleware, generateRoadmap);
+router.post("/generate-roadmap", protect, generateRoadmap);
 
 // Get user's roadmap (protected)
-router.get("/my-roadmap", authMiddleware, getMyRoadmap);
+router.get("/my-roadmap", protect, getMyRoadmap);
 
-module.exports = router;
-
+export default router;

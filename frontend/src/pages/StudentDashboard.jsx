@@ -65,7 +65,7 @@ export default function StudentDashboard() {
   ];
 
   return (
-    <DashboardLayout>
+    <DashboardLayout role="student">
       <h1 className="page-title">📊 Student Dashboard</h1>
 
       {/* ===== STATS ===== */}

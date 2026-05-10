@@ -3,148 +3,235 @@ import DashboardLayout from "../layouts/DashboardLayout";
 
 export default function StudentRoadmap() {
   const [subject, setSubject] = useState("");
-  const [roadmap, setRoadmap] = useState(null);
+  const [roadmap, setRoadmap] = useState([]);
   const [completed, setCompleted] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // ✅ Auto-load subject from Subjects page
+  // Auto-load subject
   useEffect(() => {
-    const savedSubjects = JSON.parse(localStorage.getItem("subjects")) || [];
+    const savedSubjects =
+      JSON.parse(localStorage.getItem("subjects")) || [];
+
     if (savedSubjects.length > 0) {
       setSubject(savedSubjects[0].name);
     }
   }, []);
 
-  // ✅ Load roadmap + progress
+  // Load saved roadmap
   useEffect(() => {
-    const savedRoadmap = JSON.parse(localStorage.getItem("roadmap"));
-    const savedCompleted = JSON.parse(localStorage.getItem("completed"));
+    const savedRoadmap =
+      JSON.parse(localStorage.getItem("aiRoadmap")) || [];
 
-    if (savedRoadmap) setRoadmap(savedRoadmap);
-    if (savedCompleted) setCompleted(savedCompleted);
+    const savedCompleted =
+      JSON.parse(localStorage.getItem("completed")) || [];
+
+    setRoadmap(savedRoadmap);
+    setCompleted(savedCompleted);
   }, []);
 
-  // ✅ Save to localStorage
+  // Save roadmap
   useEffect(() => {
-    if (roadmap) {
-      localStorage.setItem("roadmap", JSON.stringify(roadmap));
-      localStorage.setItem("completed", JSON.stringify(completed));
-    }
+    localStorage.setItem(
+      "aiRoadmap",
+      JSON.stringify(roadmap)
+    );
+
+    localStorage.setItem(
+      "completed",
+      JSON.stringify(completed)
+    );
   }, [roadmap, completed]);
 
-  // ✅ Generate roadmap based on subject
-  const generateRoadmap = () => {
+  // Generate AI roadmap
+  const generateRoadmap = async () => {
     if (!subject.trim()) return;
 
-    let data;
+    try {
+      setLoading(true);
 
-    if (subject.toLowerCase().includes("dbms")) {
-      data = {
-        high: ["Transactions", "Normalization", "SQL"],
-        medium: ["Indexing", "Joins"],
-        low: ["History of DBMS"],
-      };
-    } else if (subject.toLowerCase().includes("dsa")) {
-      data = {
-        high: ["Arrays", "Linked List", "Trees"],
-        medium: ["Graphs", "Recursion"],
-        low: ["Advanced Algorithms"],
-      };
-    } else {
-      data = {
-        high: ["Basics", "Core Concepts"],
-        medium: ["Practice Problems"],
-        low: ["Advanced Topics"],
-      };
+      const response = await fetch(
+        "http://localhost:5000/api/ai/generate-roadmap",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            topic: subject,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        setRoadmap(data.steps);
+        setCompleted([]);
+      }
+
+    } catch (error) {
+      console.log(error);
+      alert("Failed to generate roadmap");
+    } finally {
+      setLoading(false);
     }
-
-    setRoadmap(data);
-    setCompleted([]);
   };
 
-  // ✅ Toggle completion
-  const toggleComplete = (topic) => {
+  // Toggle completion
+  const toggleComplete = (title) => {
     setCompleted((prev) =>
-      prev.includes(topic)
-        ? prev.filter((t) => t !== topic)
-        : [...prev, topic]
+      prev.includes(title)
+        ? prev.filter((t) => t !== title)
+        : [...prev, title]
     );
   };
 
-  // ✅ Progress calculation
+  // Progress
   const getProgress = () => {
-    if (!roadmap) return 0;
+    if (!roadmap.length) return 0;
 
-    const total =
-      roadmap.high.length +
-      roadmap.medium.length +
-      roadmap.low.length;
-
-    return Math.round((completed.length / total) * 100);
+    return Math.round(
+      (completed.length / roadmap.length) * 100
+    );
   };
-
-  // ✅ Render section
-  const renderSection = (title, items) => (
-    <div className="dashboard-card">
-      <h3>{title}</h3>
-
-      {items.map((item, i) => (
-        <div key={i}>
-          <input
-            type="checkbox"
-            checked={completed.includes(item)}
-            onChange={() => toggleComplete(item)}
-          />
-          <span
-            style={{
-              marginLeft: "10px",
-              textDecoration: completed.includes(item)
-                ? "line-through"
-                : "none",
-            }}
-          >
-            {item}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
 
   return (
     <DashboardLayout>
-      <h1>🗺 AI Study Roadmap</h1>
+      <div
+        style={{
+          padding: "20px",
+        }}
+      >
+        <h1
+          style={{
+            fontSize: "40px",
+            marginBottom: "20px",
+            fontWeight: "bold",
+          }}
+        >
+          🗺 AI Study Roadmap
+        </h1>
 
-      {/* INPUT */}
-      <div className="dashboard-card">
-        <h3>🤖 Generate AI Roadmap</h3>
-
-        <input
-          className="input"
-          placeholder="Enter subject (e.g. DBMS)"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-        />
-
-        <button className="btn" onClick={generateRoadmap}>
-          Generate
-        </button>
-      </div>
-
-      {/* PROGRESS */}
-      {roadmap && (
+        {/* INPUT SECTION */}
         <div className="dashboard-card">
-          <h3>📊 Progress</h3>
-          <p>{getProgress()}% Completed</p>
-        </div>
-      )}
+          <h2>🤖 Generate AI Roadmap</h2>
 
-      {/* ROADMAP */}
-      {roadmap && (
-        <>
-          {renderSection("🔥 High Priority", roadmap.high)}
-          {renderSection("⚡ Medium Priority", roadmap.medium)}
-          {renderSection("📌 Low Priority", roadmap.low)}
-        </>
-      )}
+          <input
+            className="input"
+            placeholder="Enter topic (e.g. Machine Learning)"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+          />
+
+          <button
+            className="btn"
+            onClick={generateRoadmap}
+            disabled={loading}
+          >
+            {loading ? "Generating..." : "Generate"}
+          </button>
+        </div>
+
+        {/* PROGRESS */}
+        {roadmap.length > 0 && (
+          <div className="dashboard-card">
+            <h2>📊 Progress Tracker</h2>
+
+            <div
+              style={{
+                width: "100%",
+                height: "20px",
+                background: "#ddd",
+                borderRadius: "10px",
+                overflow: "hidden",
+                marginTop: "10px",
+              }}
+            >
+              <div
+                style={{
+                  width: `${getProgress()}%`,
+                  height: "100%",
+                  background:
+                    "linear-gradient(90deg,#00ff87,#60efff)",
+                  transition: "0.4s",
+                }}
+              />
+            </div>
+
+            <p
+              style={{
+                marginTop: "10px",
+                fontWeight: "bold",
+              }}
+            >
+              {getProgress()}% Completed
+            </p>
+          </div>
+        )}
+
+        {/* ROADMAP CARDS */}
+        <div
+          style={{
+            display: "grid",
+            gap: "20px",
+            marginTop: "20px",
+          }}
+        >
+          {roadmap.map((item, index) => (
+            <div
+              key={index}
+              className="dashboard-card"
+              style={{
+                borderLeft:
+                  item.priority === "High"
+                    ? "6px solid red"
+                    : item.priority === "Medium"
+                    ? "6px solid orange"
+                    : "6px solid green",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <h2>{item.title}</h2>
+
+                <input
+                  type="checkbox"
+                  checked={completed.includes(item.title)}
+                  onChange={() =>
+                    toggleComplete(item.title)
+                  }
+                />
+              </div>
+
+              <p>
+                <strong>Level:</strong> {item.level}
+              </p>
+
+              <p>
+                <strong>Duration:</strong> {item.duration}
+              </p>
+
+              <p>
+                <strong>Priority:</strong> {item.priority}
+              </p>
+
+              <p
+                style={{
+                  marginTop: "10px",
+                  lineHeight: "1.6",
+                }}
+              >
+                {item.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
     </DashboardLayout>
   );
 }

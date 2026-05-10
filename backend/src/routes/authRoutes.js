@@ -1,16 +1,23 @@
-const express = require("express");
+import express from "express";
+
+import {
+    registerUser,
+    loginUser,
+    verifyOTP
+} from "../controllers/authController.js";
+
+import { protect } from "../middleware/authMiddleware.js";
+
 const router = express.Router();
 
-const { registerUser, loginUser, verifyOTP } = require("../controllers/authController");
-const { protect } = require("../middleware/authMiddleware");
-
+// ================= AUTH ROUTES =================
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 
-// 🔥 NEW OTP ROUTE
+// 🔥 OTP ROUTE
 router.post("/verify-otp", verifyOTP);
 
-// Protected route (unchanged)
+// ================= PROTECTED ROUTE =================
 router.get("/profile", protect, (req, res) => {
     res.json({
         message: "You accessed protected route",
@@ -18,4 +25,4 @@ router.get("/profile", protect, (req, res) => {
     });
 });
 
-module.exports = router;
+export default router;
