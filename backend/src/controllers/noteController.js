@@ -1,6 +1,7 @@
 import Note from "../models/Note.js";
 
-// 📤 Upload Note
+// ================= UPLOAD NOTE =================
+
 export const uploadNote = async (req, res) => {
 
   try {
@@ -16,16 +17,20 @@ export const uploadNote = async (req, res) => {
 
     }
 
-    // 📎 File URL
-    const fileUrl = `/uploads/${req.file.originalname}`;
+    console.log("UPLOADED FILE:", req.file);
 
-    // ✅ Create Note
+    // ✅ Correct file URL
+    const fileUrl = `/uploads/${req.file.filename}`;
+
+    // ✅ Save Note
     const newNote = new Note({
+
       title,
+
       fileUrl,
+
     });
 
-    // 💾 Save to MongoDB
     await newNote.save();
 
     res.status(201).json(newNote);
@@ -39,13 +44,15 @@ export const uploadNote = async (req, res) => {
 
     res.status(500).json({
       message: "Failed to upload note",
+      error: error.message,
     });
 
   }
 
 };
 
-// 📋 Get All Notes
+// ================= GET NOTES =================
+
 export const getNotes = async (req, res) => {
 
   try {
@@ -71,7 +78,8 @@ export const getNotes = async (req, res) => {
 
 };
 
-// ❌ Delete Note
+// ================= DELETE NOTE =================
+
 export const deleteNote = async (req, res) => {
 
   try {
