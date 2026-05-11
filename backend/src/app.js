@@ -27,20 +27,15 @@ import studentRoutes from "./routes/studentRoutes.js";
 // 👨‍💼 Admin Routes
 import adminRoutes from "./routes/adminRoutes.js";
 
+// ✅ FIXED IMPORTS
+import topicRoutes from "./routes/topicRoutes.js";
+import resourceRoutes from "./routes/resourceRoutes.js";
+import fileRoutes from "./routes/fileRoutes.js";
+
 const app = express();
 
-const topicRoutes = require("./routes/topicRoutes");
-const resourceRoutes = require("./routes/resourceRoutes");
-const fileRoutes = require("./routes/fileRoutes");
-
 // ================= MIDDLEWARE =================
-app.use(cors()); // 🔥 allow frontend connection
-app.use(express.json());
-app.use("/api/roadmap", roadmapRoutes);
-app.use("/api/topics", topicRoutes);
-app.use("/api", resourceRoutes);
-app.use("/api/files", fileRoutes);
-
+app.use(cors());
 
 app.use(express.json());
 
@@ -50,33 +45,22 @@ app.use(
   express.static("uploads")
 );
 
-// ================= TEST ROUTE =================
-app.get("/test", (req, res) => {
-
-  res.send("Backend + MongoDB running 🚀");
-
-});
-
-// ================= DEBUG MIDDLEWARE =================
-app.use("/api/ai", (req, res, next) => {
-
-  console.log(
-    "🔥 AI ROUTE HIT:",
-    req.method,
-    req.url
-  );
-
-  next();
-
-});
-
 // ================= ROUTES =================
-
-// 🤖 AI Routes
-app.use("/api/ai", aiRoutes);
 
 // 🗺️ Roadmap Routes
 app.use("/api/roadmap", roadmapRoutes);
+
+// 📚 Topic Routes
+app.use("/api/topics", topicRoutes);
+
+// 📦 Resource Routes
+app.use("/api", resourceRoutes);
+
+// 📁 File Routes
+app.use("/api/files", fileRoutes);
+
+// 🤖 AI Routes
+app.use("/api/ai", aiRoutes);
 
 // 🔐 Auth Routes
 app.use("/api/auth", authRoutes);
@@ -107,6 +91,26 @@ app.use(
   "/api/admin",
   adminRoutes
 );
+
+// ================= TEST ROUTE =================
+app.get("/test", (req, res) => {
+
+  res.send("Backend + MongoDB running 🚀");
+
+});
+
+// ================= DEBUG MIDDLEWARE =================
+app.use("/api/ai", (req, res, next) => {
+
+  console.log(
+    "🔥 AI ROUTE HIT:",
+    req.method,
+    req.url
+  );
+
+  next();
+
+});
 
 // ================= DATABASE CONNECTION =================
 connectDB();
