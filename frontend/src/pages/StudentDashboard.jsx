@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
 import "../styles/auth.css";
+import API from "../api";
 
 import {
   BarChart,
@@ -16,7 +17,10 @@ export default function StudentDashboard() {
 
   const navigate = useNavigate();
 
+  const messagesEndRef = useRef(null);
+
   // ================= AUTH =================
+
   useEffect(() => {
 
     const token = localStorage.getItem("token");
@@ -28,6 +32,7 @@ export default function StudentDashboard() {
   }, [navigate]);
 
   // ================= STATS =================
+
   const [stats, setStats] = useState({
     subjects: 0,
     completed: 0,
@@ -35,19 +40,33 @@ export default function StudentDashboard() {
   });
 
   // ================= AI CHAT =================
+
   const [chatOpen, setChatOpen] = useState(false);
+
+  const [loadingAI, setLoadingAI] = useState(false);
 
   const [messages, setMessages] = useState([
     {
       sender: "ai",
       text:
-        "Hello 👋 I am your AI Study Assistant. Ask me anything about studying, productivity, or your roadmap.",
+        "Hello 👋 I am your AI Study Assistant. Ask me anything about studying, productivity, coding, exams, or your roadmap.",
     },
   ]);
 
   const [input, setInput] = useState("");
 
+  // ================= AUTO SCROLL =================
+
+  useEffect(() => {
+
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+
+  }, [messages]);
+
   // ================= LOAD DATA =================
+
   useEffect(() => {
 
     const loadData = () => {
@@ -81,35 +100,77 @@ export default function StudentDashboard() {
   }, []);
 
   // ================= SEND MESSAGE =================
-  const sendMessage = () => {
+
+  const sendMessage = async () => {
 
     if (!input.trim()) return;
 
+    const userInput = input;
+
     const userMessage = {
       sender: "user",
-      text: input,
+      text: userInput,
     };
 
     setMessages((prev) => [...prev, userMessage]);
 
-    // Fake AI response for now
-    setTimeout(() => {
+    setInput("");
+
+    setLoadingAI(true);
+
+    try {
+
+      const res = await API.post("/ai/chat", {
+        message: userInput,
+      });
 
       const aiReply = {
         sender: "ai",
         text:
-          "🤖 AI Assistant: I received your message — backend AI integration coming next.",
+          res.data.reply ||
+          "AI could not generate a response.",
       };
 
       setMessages((prev) => [...prev, aiReply]);
 
-    }, 1000);
+    } catch (error) {
 
-    setInput("");
+      console.error(error);
+
+      setMessages((prev) => [
+
+        ...prev,
+
+        {
+          sender: "ai",
+          text:
+            "⚠ AI assistant failed to respond.",
+        },
+
+      ]);
+
+    } finally {
+
+      setLoadingAI(false);
+
+    }
+
+  };
+
+  // ================= ENTER KEY SUPPORT =================
+
+  const handleKeyPress = (e) => {
+
+    if (e.key === "Enter") {
+
+      sendMessage();
+
+    }
 
   };
 
   // ================= CHART DATA =================
+
   const data = [
     { name: "Mon", study: 2 },
     { name: "Tue", study: 3 },
@@ -555,6 +616,37 @@ export default function StudentDashboard() {
 
             ))}
 
+            {loadingAI && (
+
+              <div
+
+                style={{
+
+                  alignSelf: "flex-start",
+
+                  background:
+                    "rgba(255,255,255,0.08)",
+
+                  padding: "12px 14px",
+
+                  borderRadius: "18px",
+
+                  color: "#fff",
+
+                  fontSize: "14px",
+
+                }}
+
+              >
+
+                ✨ AI is thinking...
+
+              </div>
+
+            )}
+
+            <div ref={messagesEndRef} />
+
           </div>
 
           {/* INPUT */}
@@ -584,6 +676,8 @@ export default function StudentDashboard() {
                 setInput(e.target.value)
               }
 
+              onKeyDown={handleKeyPress}
+
               placeholder="Ask AI anything..."
 
               style={{
@@ -612,6 +706,8 @@ export default function StudentDashboard() {
 
               onClick={sendMessage}
 
+              disabled={loadingAI}
+
               style={{
 
                 padding: "12px 16px",
@@ -628,6 +724,9 @@ export default function StudentDashboard() {
                 fontWeight: "700",
 
                 cursor: "pointer",
+
+                opacity:
+                  loadingAI ? 0.7 : 1,
 
               }}
 

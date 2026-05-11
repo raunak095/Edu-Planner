@@ -1,10 +1,31 @@
 import express from "express";
-import { generateRoadmap,generateQuiz, } from "../controllers/aiController.js";
+
+import {
+  generateRoadmap,
+  generateQuiz,
+  chatWithAI,
+} from "../controllers/aiController.js";
 
 const router = express.Router();
+
 console.log("🚀 AI ROUTES LOADED");
 
-router.post("/generate-roadmap", generateRoadmap);
-router.post("/generate-quiz", generateQuiz);
+// ================= ROADMAP =================
+router.post(
+  "/generate-roadmap",
+  generateRoadmap
+);
+
+// ================= QUIZ =================
+router.post(
+  "/generate-quiz",
+  generateQuiz
+);
+
+// ================= AI CHAT =================
+router.post(
+  "/chat",
+  chatWithAI
+);
 
 export default router;
