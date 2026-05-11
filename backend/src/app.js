@@ -2,6 +2,7 @@ import "./bootstrap.js";
 
 import express from "express";
 import cors from "cors";
+import path from "path";
 
 import connectDB from "./config/db.js";
 
@@ -39,10 +40,12 @@ app.use(cors());
 
 app.use(express.json());
 
-// 📂 Static Upload Folder
+// ✅ FIXED STATIC UPLOADS PATH
 app.use(
   "/uploads",
-  express.static("uploads")
+  express.static(
+    path.join(process.cwd(), "uploads")
+  )
 );
 
 // ================= ROUTES =================

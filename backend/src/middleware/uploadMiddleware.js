@@ -1,48 +1,96 @@
 import multer from "multer";
 import path from "path";
+import fs from "fs";
 
-// Use memory storage instead of disk
-const storage = multer.memoryStorage();
+// ================= CREATE UPLOADS FOLDER =================
 
-// File filter - only allow PDF, DOCX, TXT
+const uploadPath = "uploads";
+
+if (!fs.existsSync(uploadPath)) {
+  fs.mkdirSync(uploadPath);
+}
+
+// ================= STORAGE =================
+
+const storage = multer.diskStorage({
+
+  destination: (req, file, cb) => {
+
+    cb(null, uploadPath);
+
+  },
+
+  filename: (req, file, cb) => {
+
+    const uniqueName =
+      Date.now() +
+      "-" +
+      file.originalname.replace(/\s+/g, "-");
+
+    cb(null, uniqueName);
+
+  },
+
+});
+
+// ================= FILE FILTER =================
+
 const fileFilter = (req, file, cb) => {
+
   const allowedMimes = [
+
     "application/pdf",
+
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+
     "text/plain",
+
   ];
 
-  // Also check file extension for extra safety
-  const allowedExtensions = [".pdf", ".docx", ".txt"];
+  const allowedExtensions = [
+    ".pdf",
+    ".docx",
+    ".txt",
+  ];
 
-  // Get the file extension
   const fileExt = path
     .extname(file.originalname)
     .toLowerCase();
 
-  // Check MIME type and file extension
   if (
     allowedMimes.includes(file.mimetype) ||
     allowedExtensions.includes(fileExt)
   ) {
+
     cb(null, true);
+
   } else {
+
     cb(
       new Error(
         "Only PDF, DOCX, and TXT files are allowed"
       ),
       false
     );
+
   }
+
 };
 
-// Create multer instance with 3MB limit
+// ================= MULTER =================
+
 const upload = multer({
+
   storage,
+
   fileFilter,
+
   limits: {
-    fileSize: 20 * 1024 * 1024, // 20 MB
+
+    fileSize: 20 * 1024 * 1024,
+
   },
+
 });
 
 export default upload;

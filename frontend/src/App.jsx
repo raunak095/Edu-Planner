@@ -17,6 +17,7 @@ import StudentSubjects from "./pages/StudentSubjects";
 import StudentRoadmap from "./pages/StudentRoadmap";
 import StudentAnnouncements from "./pages/StudentAnnouncements";
 import StudentSettings from "./pages/StudentSettings";
+import StudentNotes from "./pages/StudentNotes";
 
 /* ================= TEACHER PAGES ================= */
 
@@ -97,6 +98,19 @@ function App() {
               allowedRole="student"
             >
               <StudentRoadmap />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ================= NEW NOTES ROUTE ================= */}
+
+        <Route
+          path="/student/notes"
+          element={
+            <ProtectedRoute
+              allowedRole="student"
+            >
+              <StudentNotes />
             </ProtectedRoute>
           }
         />
@@ -240,7 +254,9 @@ function App() {
       </Routes>
 
     </BrowserRouter>
+
   );
+
 }
 
 export default App;

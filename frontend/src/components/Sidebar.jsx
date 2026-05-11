@@ -55,6 +55,17 @@ export default function Sidebar({ role }) {
             🗺️ Roadmap
           </div>
 
+          {/* ================= NEW NOTES MENU ================= */}
+
+          <div
+            className="menu-item"
+            onClick={() =>
+              navigate("/student/notes")
+            }
+          >
+            📖 Notes Library
+          </div>
+
           <div
             className="menu-item"
             onClick={() =>
@@ -203,5 +214,7 @@ export default function Sidebar({ role }) {
       </div>
 
     </div>
+
   );
+
 }
