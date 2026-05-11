@@ -6,7 +6,7 @@ import {
 } from "../controllers/topicController.js";
 
 import {
-  authMiddleware,
+  protect,
 } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -14,14 +14,14 @@ const router = express.Router();
 // 📚 Get Topics By Subject
 router.get(
   "/:subject",
-  authMiddleware,
+  protect,
   getTopicsBySubject
 );
 
 // ➕ Create Topic
 router.post(
   "/",
-  authMiddleware,
+  protect,
   createTopic
 );
 
