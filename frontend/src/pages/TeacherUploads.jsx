@@ -1,3 +1,5 @@
+
+
 import { useEffect, useState } from "react";
 
 import DashboardLayout from "../layouts/DashboardLayout";
@@ -6,22 +8,23 @@ import API from "../api";
 
 export default function TeacherUploads() {
 
-  // 📂 Notes State
+  // ================= STATES =================
+
   const [notes, setNotes] = useState([]);
 
-  // 📄 Form State
   const [title, setTitle] = useState("");
 
   const [file, setFile] = useState(null);
 
-  // ⏳ Loading State
   const [loading, setLoading] = useState(false);
 
-  // ❌ Error State
   const [error, setError] = useState("");
 
-  // ✅ Success State
   const [success, setSuccess] = useState("");
+
+  const [aiLoading, setAiLoading] = useState(null);
+
+  const [summaries, setSummaries] = useState({});
 
   // ================= FETCH NOTES =================
 
@@ -64,7 +67,6 @@ export default function TeacherUploads() {
 
     setSuccess("");
 
-    // ✅ Validation
     if (!title || !file) {
 
       setError(
@@ -79,18 +81,11 @@ export default function TeacherUploads() {
 
       setLoading(true);
 
-      // 📦 FormData
       const formData = new FormData();
 
-      formData.append(
-        "title",
-        title
-      );
+      formData.append("title", title);
 
-      formData.append(
-        "file",
-        file
-      );
+      formData.append("file", file);
 
       const response = await API.post(
 
@@ -99,27 +94,29 @@ export default function TeacherUploads() {
         formData,
 
         {
+
           headers: {
+
             "Content-Type":
               "multipart/form-data",
+
           },
+
         }
 
       );
 
-      // ✅ Update UI instantly
       setNotes([
         response.data,
         ...notes,
       ]);
 
-      // ✅ Reset form
       setTitle("");
 
       setFile(null);
 
       setSuccess(
-        "File uploaded successfully"
+        "✨ File uploaded successfully"
       );
 
     } catch (err) {
@@ -147,18 +144,15 @@ export default function TeacherUploads() {
 
     const confirmDelete =
       window.confirm(
-        "Are you sure you want to delete this note?"
+        "Delete this note?"
       );
 
     if (!confirmDelete) return;
 
     try {
 
-      await API.delete(
-        `/notes/${id}`
-      );
+      await API.delete(`/notes/${id}`);
 
-      // ✅ Remove from UI
       setNotes(
 
         notes.filter(
@@ -169,7 +163,7 @@ export default function TeacherUploads() {
       );
 
       setSuccess(
-        "Note deleted successfully"
+        "🗑 Note deleted successfully"
       );
 
     } catch (err) {
@@ -187,6 +181,54 @@ export default function TeacherUploads() {
 
   };
 
+  // ================= AI SUMMARY =================
+
+  const generateSummary = async (note) => {
+
+    try {
+
+      setAiLoading(note._id);
+
+      const response = await API.post(
+        "/ai/chat",
+        {
+          message: `
+Generate smart study notes summary for this file title:
+
+"${note.title}"
+
+Return:
+1. Short summary
+2. Key concepts
+3. Important exam topics
+4. Quick revision tips
+
+Keep response concise and student-friendly.
+          `,
+        }
+      );
+
+      setSummaries((prev) => ({
+        ...prev,
+        [note._id]: response.data.reply,
+      }));
+
+    } catch (err) {
+
+      console.error(err);
+
+      setError(
+        "AI summary generation failed"
+      );
+
+    } finally {
+
+      setAiLoading(null);
+
+    }
+
+  };
+
   // ================= INITIAL FETCH =================
 
   useEffect(() => {
@@ -199,18 +241,53 @@ export default function TeacherUploads() {
 
     <DashboardLayout role="teacher">
 
-      {/* ================= PAGE TITLE ================= */}
+      {/* ================= HEADER ================= */}
 
-      <h1 className="page-title">
-        📂 Upload Notes
-      </h1>
+      <div
+        style={{
+          marginBottom: "30px",
+        }}
+      >
+
+        <h1
+          style={{
+            fontSize: "36px",
+            fontWeight: "800",
+            background:
+              "linear-gradient(90deg,#00ff99,#00c3ff)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}
+        >
+
+          📂 AI Notes Upload Center
+
+        </h1>
+
+        <p
+          style={{
+            opacity: 0.7,
+            marginTop: "8px",
+          }}
+        >
+
+          Upload notes and generate AI-powered summaries.
+
+        </p>
+
+      </div>
 
       {/* ================= UPLOAD FORM ================= */}
 
       <div
         className="card"
         style={{
-          marginTop: "20px",
+          borderRadius: "28px",
+          background:
+            "rgba(255,255,255,0.04)",
+          backdropFilter: "blur(16px)",
+          border:
+            "1px solid rgba(255,255,255,0.08)",
         }}
       >
 
@@ -218,7 +295,7 @@ export default function TeacherUploads() {
           📤 Upload Study Material
         </h2>
 
-        {/* ❌ ERROR */}
+        {/* ERROR */}
 
         {error && (
 
@@ -226,17 +303,19 @@ export default function TeacherUploads() {
             style={{
               background: "#ff4d4f",
               color: "white",
-              padding: "10px",
-              borderRadius: "8px",
+              padding: "12px",
+              borderRadius: "12px",
               marginTop: "15px",
             }}
           >
+
             {error}
+
           </div>
 
         )}
 
-        {/* ✅ SUCCESS */}
+        {/* SUCCESS */}
 
         {success && (
 
@@ -244,12 +323,14 @@ export default function TeacherUploads() {
             style={{
               background: "#52c41a",
               color: "white",
-              padding: "10px",
-              borderRadius: "8px",
+              padding: "12px",
+              borderRadius: "12px",
               marginTop: "15px",
             }}
           >
+
             {success}
+
           </div>
 
         )}
@@ -267,8 +348,6 @@ export default function TeacherUploads() {
 
         >
 
-          {/* 📄 TITLE */}
-
           <input
             type="text"
             placeholder="Enter note title"
@@ -278,8 +357,6 @@ export default function TeacherUploads() {
             }
             className="input"
           />
-
-          {/* 📎 FILE */}
 
           <input
             type="file"
@@ -291,8 +368,6 @@ export default function TeacherUploads() {
             className="input"
           />
 
-          {/* 📤 BUTTON */}
-
           <button
             type="submit"
             className="btn"
@@ -301,7 +376,7 @@ export default function TeacherUploads() {
 
             {loading
               ? "Uploading..."
-              : "Upload Note"}
+              : "🚀 Upload Note"}
 
           </button>
 
@@ -309,19 +384,19 @@ export default function TeacherUploads() {
 
       </div>
 
-      {/* ================= NOTES LIST ================= */}
+      {/* ================= NOTES GRID ================= */}
 
       <div
         style={{
           display: "grid",
           gridTemplateColumns:
-            "repeat(auto-fit, minmax(280px, 1fr))",
-          gap: "20px",
-          marginTop: "30px",
+            "repeat(auto-fit, minmax(320px, 1fr))",
+          gap: "24px",
+          marginTop: "35px",
         }}
       >
 
-        {/* ⏳ LOADING */}
+        {/* LOADING */}
 
         {loading &&
           notes.length === 0 && (
@@ -332,7 +407,7 @@ export default function TeacherUploads() {
 
         )}
 
-        {/* ❌ EMPTY */}
+        {/* EMPTY */}
 
         {!loading &&
           notes.length === 0 && (
@@ -347,20 +422,37 @@ export default function TeacherUploads() {
 
         )}
 
-        {/* 📂 NOTE CARDS */}
+        {/* NOTES */}
 
         {notes.map((note) => (
 
           <div
+
             key={note._id}
+
             className="card"
+
+            style={{
+
+              borderRadius: "28px",
+
+              background:
+                "linear-gradient(135deg, rgba(0,255,170,0.05), rgba(0,195,255,0.05))",
+
+              border:
+                "1px solid rgba(255,255,255,0.06)",
+
+              backdropFilter: "blur(18px)",
+
+            }}
+
           >
 
             <h2>
               📄 {note.title}
             </h2>
 
-            {/* 📎 FILE LINK */}
+            {/* FILE */}
 
             <a
               href={`https://edu-planner-backrnd.onrender.com${note.fileUrl}`}
@@ -369,15 +461,17 @@ export default function TeacherUploads() {
               style={{
                 display: "inline-block",
                 marginTop: "15px",
-                color: "#1890ff",
+                color: "#00c3ff",
                 fontWeight: "bold",
                 textDecoration: "none",
               }}
             >
+
               📥 View / Download File
+
             </a>
 
-            {/* 🕒 DATE */}
+            {/* DATE */}
 
             <p
               style={{
@@ -396,18 +490,99 @@ export default function TeacherUploads() {
 
             </p>
 
-            {/* ❌ DELETE */}
+            {/* AI BUTTON */}
 
             <button
+
               className="btn"
+
+              style={{
+                marginTop: "18px",
+              }}
+
+              onClick={() =>
+                generateSummary(note)
+              }
+
+              disabled={
+                aiLoading === note._id
+              }
+
+            >
+
+              {aiLoading === note._id
+                ? "Generating..."
+                : "🤖 Generate AI Summary"}
+
+            </button>
+
+            {/* AI SUMMARY */}
+
+            {summaries[note._id] && (
+
+              <div
+
+                style={{
+
+                  marginTop: "18px",
+
+                  padding: "16px",
+
+                  borderRadius: "18px",
+
+                  background:
+                    "rgba(255,255,255,0.05)",
+
+                  border:
+                    "1px solid rgba(255,255,255,0.06)",
+
+                  whiteSpace: "pre-wrap",
+
+                  lineHeight: "1.7",
+
+                  fontSize: "14px",
+
+                }}
+
+              >
+
+                <h3>
+                  🧠 AI Summary
+                </h3>
+
+                <p
+                  style={{
+                    marginTop: "10px",
+                  }}
+                >
+
+                  {summaries[note._id]}
+
+                </p>
+
+              </div>
+
+            )}
+
+            {/* DELETE */}
+
+            <button
+
+              className="btn"
+
               style={{
                 marginTop: "20px",
+                background: "#ff4d4f",
               }}
+
               onClick={() =>
                 handleDelete(note._id)
               }
+
             >
+
               ❌ Delete
+
             </button>
 
           </div>
