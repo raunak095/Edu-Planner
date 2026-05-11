@@ -1,66 +1,124 @@
-const Resource = require("../models/resource");
+import Resource from "../models/Resource.js";
 
-// POST /resources
-const createResource = async (req, res) => {
+// ================= CREATE RESOURCE =================
+export const createResource = async (req, res) => {
+
   try {
-    const { subject, topicId, title, link, type } = req.body;
 
-    // 🔐 Role check
-    if (req.user.role !== "teacher" && req.user.role !== "admin") {
-      return res.status(403).json({
-        message: "Only teachers/admins can add resources"
-      });
-    }
-
-    if (!subject || !title) {
-      return res.status(400).json({
-        message: "Subject and title are required"
-      });
-    }
-
-    const resource = await Resource.create({
-      teacherId: req.user.id,
-      subject: subject.toLowerCase(),
+    const {
+      subject,
       topicId,
       title,
       link,
-      type
+      type,
+    } = req.body;
+
+    // 🔐 Role Check
+    if (
+      req.user.role !== "teacher" &&
+      req.user.role !== "admin"
+    ) {
+
+      return res.status(403).json({
+        message:
+          "Only teachers/admins can add resources",
+      });
+
+    }
+
+    // ✅ Validation
+    if (!subject || !title) {
+
+      return res.status(400).json({
+        message:
+          "Subject and title are required",
+      });
+
+    }
+
+    // ✅ Create Resource
+    const resource = await Resource.create({
+
+      teacherId: req.user.id,
+
+      subject: subject.toLowerCase(),
+
+      topicId,
+
+      title,
+
+      link,
+
+      type,
+
     });
 
     res.status(201).json({
-      message: "Resource added successfully",
-      resource
+
+      message:
+        "Resource added successfully",
+
+      resource,
+
     });
 
   } catch (err) {
-    res.status(500).json({ message: err.message });
+
+    console.error(
+      "Create Resource Error:",
+      err
+    );
+
+    res.status(500).json({
+      message: err.message,
+    });
+
   }
+
 };
 
-// GET /resources/:subject
-const getResourcesBySubject = async (req, res) => {
+// ================= GET RESOURCES =================
+export const getResourcesBySubject = async (req, res) => {
+
   try {
+
     const { subject } = req.params;
 
     const resources = await Resource.find({
-      subject: new RegExp(`^${subject}$`, "i"),
-      isApproved: true // only show approved content
+
+      subject: new RegExp(
+        `^${subject}$`,
+        "i"
+      ),
+
+      isApproved: true,
+
     });
 
     if (!resources.length) {
+
       return res.status(404).json({
-        message: "No resources found for this subject"
+        message:
+          "No resources found for this subject",
       });
+
     }
 
-    res.status(200).json({ resources });
+    res.status(200).json({
+      resources,
+    });
 
   } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
 
-module.exports = {
-  createResource,
-  getResourcesBySubject
+    console.error(
+      "Get Resources Error:",
+      err
+    );
+
+    res.status(500).json({
+      message: err.message,
+    });
+
+  }
+
 };

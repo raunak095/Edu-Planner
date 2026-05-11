@@ -1,13 +1,28 @@
-const express = require("express");
+import express from "express";
+
+import {
+  createResource,
+  getResourcesBySubject,
+} from "../controllers/resourceController.js";
+
+import {
+  protect,
+} from "../middleware/authMiddleware.js";
+
 const router = express.Router();
 
-const { createResource, getResourcesBySubject } = require("../controllers/resourceController");
-const { authMiddleware } = require("../middleware/authMiddleware");
+// ➕ Add Resource
+router.post(
+  "/resources",
+  protect,
+  createResource
+);
 
-// POST: Add resource (teacher/admin only)
-router.post("/resources", authMiddleware, createResource);
+// 📚 Get Resources By Subject
+router.get(
+  "/resources/:subject",
+  protect,
+  getResourcesBySubject
+);
 
-// GET: Fetch resources by subject
-router.get("/resources/:subject", authMiddleware, getResourcesBySubject);
-
-module.exports = router;
+export default router;
