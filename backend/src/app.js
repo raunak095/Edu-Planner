@@ -29,8 +29,18 @@ import adminRoutes from "./routes/adminRoutes.js";
 
 const app = express();
 
+const topicRoutes = require("./routes/topicRoutes");
+const resourceRoutes = require("./routes/resourceRoutes");
+const fileRoutes = require("./routes/fileRoutes");
+
 // ================= MIDDLEWARE =================
-app.use(cors());
+app.use(cors()); // 🔥 allow frontend connection
+app.use(express.json());
+app.use("/api/roadmap", roadmapRoutes);
+app.use("/api/topics", topicRoutes);
+app.use("/api", resourceRoutes);
+app.use("/api/files", fileRoutes);
+
 
 app.use(express.json());
 

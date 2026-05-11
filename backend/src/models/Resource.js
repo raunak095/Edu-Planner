@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+
 const resourceSchema = new mongoose.Schema({
   teacherId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -50,3 +52,5 @@ const resourceSchema = new mongoose.Schema({
   }
 
 }, { timestamps: true });
+
+module.exports = mongoose.model("Resource", resourceSchema);
