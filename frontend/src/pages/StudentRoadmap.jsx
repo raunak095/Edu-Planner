@@ -158,7 +158,62 @@ export default function StudentRoadmap() {
     );
 
   };
+  // ================= TOTAL TOPICS =================
+const getTotalTopics = () => {
 
+  if (!roadmap) return 0;
+
+  return roadmap.plan.reduce(
+    (sum, day) => sum + day.topics.length,
+    0
+  );
+
+};
+
+// ================= TOTAL HOURS =================
+const getTotalHours = () => {
+
+  if (!roadmap) return 0;
+
+  return roadmap.plan.reduce(
+
+    (sum, day) =>
+
+      sum +
+
+      day.topics.reduce(
+        (topicSum, topic) =>
+          topicSum + topic.estimatedHours,
+        0
+      ),
+
+    0
+
+  );
+
+};
+
+// ================= STREAK =================
+const getStreak = () => {
+
+  return completed.length;
+
+};
+
+// ================= STUDY INTENSITY =================
+const getIntensity = () => {
+
+  if (!roadmap) return "Low";
+
+  const hours = getTotalHours();
+
+  if (hours >= 40) return "Extreme";
+  if (hours >= 25) return "High";
+  if (hours >= 15) return "Medium";
+
+  return "Low";
+
+};
   // ================= PROGRESS =================
   const getProgress = () => {
 
@@ -320,6 +375,7 @@ export default function StudentRoadmap() {
         </button>
 
       </div>
+            
 
       {/* ================= PROGRESS ================= */}
 
@@ -380,6 +436,134 @@ export default function StudentRoadmap() {
         </div>
 
       )}
+      {/* ================= SMART STATS ================= */}
+
+{roadmap && (
+
+  <div
+
+    style={{
+
+      display: "grid",
+
+      gridTemplateColumns:
+        "repeat(auto-fit,minmax(220px,1fr))",
+
+      gap: "18px",
+
+      marginTop: "24px",
+
+    }}
+
+  >
+
+    {/* TOTAL TOPICS */}
+
+    <div
+      className="dashboard-card"
+      style={{
+        borderRadius: "22px",
+        background:
+          "linear-gradient(135deg, rgba(0,255,170,0.08), rgba(0,195,255,0.08))",
+      }}
+    >
+
+      <h3>📚 Topics</h3>
+
+      <h1
+        style={{
+          marginTop: "10px",
+          fontSize: "38px",
+        }}
+      >
+
+        {getTotalTopics()}
+
+      </h1>
+
+    </div>
+
+    {/* HOURS */}
+
+    <div
+      className="dashboard-card"
+      style={{
+        borderRadius: "22px",
+        background:
+          "linear-gradient(135deg, rgba(255,180,0,0.08), rgba(255,80,0,0.08))",
+      }}
+    >
+
+      <h3>⏱ Hours</h3>
+
+      <h1
+        style={{
+          marginTop: "10px",
+          fontSize: "38px",
+        }}
+      >
+
+        {getTotalHours()}h
+
+      </h1>
+
+    </div>
+
+    {/* STREAK */}
+
+    <div
+      className="dashboard-card"
+      style={{
+        borderRadius: "22px",
+        background:
+          "linear-gradient(135deg, rgba(255,0,120,0.08), rgba(255,0,200,0.08))",
+      }}
+    >
+
+      <h3>🔥 Streak</h3>
+
+      <h1
+        style={{
+          marginTop: "10px",
+          fontSize: "38px",
+        }}
+      >
+
+        {getStreak()}
+
+      </h1>
+
+    </div>
+
+    {/* INTENSITY */}
+
+    <div
+      className="dashboard-card"
+      style={{
+        borderRadius: "22px",
+        background:
+          "linear-gradient(135deg, rgba(170,0,255,0.08), rgba(0,140,255,0.08))",
+      }}
+    >
+
+      <h3>⚡ Intensity</h3>
+
+      <h1
+        style={{
+          marginTop: "10px",
+          fontSize: "34px",
+        }}
+      >
+
+        {getIntensity()}
+
+      </h1>
+
+    </div>
+
+  </div>
+
+)}
 
       {/* ================= AI INSIGHTS ================= */}
 
