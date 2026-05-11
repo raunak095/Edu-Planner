@@ -37,4 +37,4 @@ router.get("/user/:uploadedBy", getFilesByUser);
 // Retrieve files associated with a specific role
 router.get("/role/:role", getFilesByRole);
 
-module.exports = router;
+export default router;
