@@ -1,13 +1,28 @@
-const express = require("express");
+import express from "express";
+
+import {
+  getTopicsBySubject,
+  createTopic,
+} from "../controllers/topicController.js";
+
+import {
+  authMiddleware,
+} from "../middleware/authMiddleware.js";
+
 const router = express.Router();
 
-const { getTopicsBySubject, createTopic } = require("../controllers/topicController");
-const { authMiddleware } = require("../middleware/authMiddleware");
+// 📚 Get Topics By Subject
+router.get(
+  "/:subject",
+  authMiddleware,
+  getTopicsBySubject
+);
 
-// GET topics by subject (protected or optional — your choice)
-router.get("/:subject", authMiddleware, getTopicsBySubject);
+// ➕ Create Topic
+router.post(
+  "/",
+  authMiddleware,
+  createTopic
+);
 
-// POST create topic (teacher/admin only)
-router.post("/", authMiddleware, createTopic);
-
-module.exports = router;
+export default router;
