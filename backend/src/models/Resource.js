@@ -1,56 +1,103 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-const resourceSchema = new mongoose.Schema({
-  teacherId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true
+const resourceSchema = new mongoose.Schema(
+
+  {
+
+    teacherId: {
+
+      type: mongoose.Schema.Types.ObjectId,
+
+      ref: "User",
+
+      required: true,
+
+    },
+
+    subject: {
+
+      type: String,
+
+      required: true,
+
+    },
+
+    // 🔗 LINK TO TOPIC
+    topicId: {
+
+      type: mongoose.Schema.Types.ObjectId,
+
+      ref: "Topic",
+
+    },
+
+    title: {
+
+      type: String,
+
+      required: true,
+
+    },
+
+    link: {
+
+      type: String,
+
+    },
+
+    type: {
+
+      type: String,
+
+      enum: [
+        "pdf",
+        "link",
+        "video",
+        "note",
+      ],
+
+      default: "link",
+
+    },
+
+    // 📈 usefulness
+    relevanceScore: {
+
+      type: Number,
+
+      default: 0,
+
+    },
+
+    // ✅ approval system
+    isApproved: {
+
+      type: Boolean,
+
+      default: false,
+
+    },
+
+    // 👁️ analytics
+    views: {
+
+      type: Number,
+
+      default: 0,
+
+    },
+
   },
 
-  subject: {
-    type: String,
-    required: true
-  },
+  {
 
-  // LINK TO TOPIC
-  topicId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Topic"
-  },
+    timestamps: true,
 
-  title: {
-    type: String,
-    required: true
-  },
-
-  link: {
-    type: String
-  },
-
-  type: {
-    type: String,
-    enum: ["pdf", "link", "video", "note"],
-    default: "link"
-  },
-
-  // usefulness for that topic
-  relevanceScore: {
-    type: Number,
-    default: 0
-  },
-
-  // validation system
-  isApproved: {
-    type: Boolean,
-    default: false
-  },
-
-  // basic analytics
-  views: {
-    type: Number,
-    default: 0
   }
 
-}, { timestamps: true });
+);
 
-module.exports = mongoose.model("Resource", resourceSchema);
+export default mongoose.model(
+  "Resource",
+  resourceSchema
+);
