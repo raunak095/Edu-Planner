@@ -34,9 +34,21 @@ export default function StudentDashboard() {
   // ================= STATS =================
 
   const [stats, setStats] = useState({
+
     subjects: 0,
-    completed: 0,
+
+    completedSubjects: 0,
+
     progress: 0,
+
+    completedTopics: 0,
+
+    totalTopics: 0,
+
+    totalHours: 0,
+
+    streak: 0,
+
   });
 
   // ================= AI CHAT =================
@@ -71,20 +83,93 @@ export default function StudentDashboard() {
 
     const loadData = () => {
 
-      const saved =
-        JSON.parse(localStorage.getItem("subjects")) || [];
+      // ================= SUBJECTS =================
 
-      const total = saved.length;
+      const savedSubjects =
+        JSON.parse(
+          localStorage.getItem("subjects")
+        ) || [];
 
-      const done =
-        saved.filter((s) => s.completed).length;
+      const totalSubjects =
+        savedSubjects.length;
+
+      const completedSubjects =
+        savedSubjects.filter(
+          (s) => s.completed
+        ).length;
+
+      // ================= ROADMAP =================
+
+      const roadmapData =
+        JSON.parse(
+          localStorage.getItem("roadmap")
+        );
+
+      const completed =
+        JSON.parse(
+          localStorage.getItem("completed")
+        ) || [];
+
+      let totalTopics = 0;
+
+      let totalHours = 0;
+
+      if (
+        roadmapData &&
+        roadmapData.plan
+      ) {
+
+        roadmapData.plan.forEach((day) => {
+
+          totalTopics +=
+            day.topics.length;
+
+          day.topics.forEach((topic) => {
+
+            totalHours +=
+              topic.estimatedHours;
+
+          });
+
+        });
+
+      }
+
+      // ================= PROGRESS =================
+
+      const progress =
+        totalTopics > 0
+
+          ? Math.round(
+              (completed.length /
+                totalTopics) *
+                100
+            )
+
+          : 0;
+
+      // ================= STREAK =================
+
+      const streak =
+        completed.length;
 
       setStats({
-        subjects: total,
-        completed: done,
-        progress: total
-          ? Math.round((done / total) * 100)
-          : 0,
+
+        subjects: totalSubjects,
+
+        completedSubjects,
+
+        progress,
+
+        completedTopics:
+          completed.length,
+
+        totalTopics,
+
+        totalHours,
+
+        streak,
+
       });
 
     };
@@ -264,7 +349,7 @@ export default function StudentDashboard() {
           }}
         >
 
-          <h3>✅ Completed</h3>
+          <h3>✅ Completed Topics</h3>
 
           <p
             style={{
@@ -273,7 +358,7 @@ export default function StudentDashboard() {
             }}
           >
 
-            {stats.completed}
+            {stats.completedTopics}
 
           </p>
 
@@ -299,6 +384,56 @@ export default function StudentDashboard() {
           >
 
             {stats.progress}%
+
+          </p>
+
+        </div>
+
+        <div
+          className="card"
+          style={{
+            borderRadius: "24px",
+            background:
+              "linear-gradient(135deg, rgba(255,120,0,0.08), rgba(255,0,80,0.08))",
+            backdropFilter: "blur(14px)",
+          }}
+        >
+
+          <h3>🔥 Streak</h3>
+
+          <p
+            style={{
+              fontSize: "34px",
+              fontWeight: "700",
+            }}
+          >
+
+            {stats.streak}
+
+          </p>
+
+        </div>
+
+        <div
+          className="card"
+          style={{
+            borderRadius: "24px",
+            background:
+              "linear-gradient(135deg, rgba(170,0,255,0.08), rgba(0,140,255,0.08))",
+            backdropFilter: "blur(14px)",
+          }}
+        >
+
+          <h3>⏱ Hours</h3>
+
+          <p
+            style={{
+              fontSize: "34px",
+              fontWeight: "700",
+            }}
+          >
+
+            {stats.totalHours}h
 
           </p>
 
@@ -387,6 +522,61 @@ export default function StudentDashboard() {
           {stats.progress}% Completed
 
         </p>
+
+      </div>
+
+      {/* ================= AI INSIGHTS ================= */}
+
+      <div
+        className="card"
+        style={{
+          marginTop: "24px",
+          borderRadius: "24px",
+          background:
+            "linear-gradient(135deg, rgba(0,255,170,0.08), rgba(0,195,255,0.08))",
+        }}
+      >
+
+        <h3>🤖 AI Productivity Insights</h3>
+
+        <div
+          style={{
+            marginTop: "16px",
+            lineHeight: "1.9",
+          }}
+        >
+
+          <p>
+            📚 Total Topics:
+            {" "}
+            {stats.totalTopics}
+          </p>
+
+          <p>
+            ✅ Completed Topics:
+            {" "}
+            {stats.completedTopics}
+          </p>
+
+          <p>
+            🔥 Current Streak:
+            {" "}
+            {stats.streak}
+          </p>
+
+          <p>
+            ⏱ Estimated Study Hours:
+            {" "}
+            {stats.totalHours}h
+          </p>
+
+          <p>
+            🚀 You are currently
+            {" "}
+            {stats.progress}% on track.
+          </p>
+
+        </div>
 
       </div>
 
@@ -517,8 +707,6 @@ export default function StudentDashboard() {
 
         >
 
-          {/* HEADER */}
-
           <div
 
             style={{
@@ -541,8 +729,6 @@ export default function StudentDashboard() {
             🤖 AI Study Assistant
 
           </div>
-
-          {/* MESSAGES */}
 
           <div
 
@@ -648,8 +834,6 @@ export default function StudentDashboard() {
             <div ref={messagesEndRef} />
 
           </div>
-
-          {/* INPUT */}
 
           <div
 
