@@ -319,8 +319,9 @@ export const generateQuizFromPDF = async (req, res) => {
     const dataBuffer =
       fs.readFileSync(req.file.path);
 
-    const pdfData =
-      await pdfParse(dataBuffer);
+    const parser=pdfParse.default || pdfParse;
+      const pdfData =
+      await parser(dataBuffer);
 
     const pdfText =
       pdfData.text.slice(0, 6000);
