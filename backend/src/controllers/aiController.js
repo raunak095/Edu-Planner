@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import fs from "fs";
-import  pdfParse from "pdf-parse";
+import  * as pdfParse from "pdf-parse";
 
 // ================= OPENROUTER CLIENT =================
 
