@@ -1,6 +1,8 @@
 import OpenAI from "openai";
 import fs from "fs";
-import  * as pdfParse from "pdf-parse";
+import  { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const pdfParse = require("pdf-parse");
 
 // ================= OPENROUTER CLIENT =================
 
@@ -319,9 +321,8 @@ export const generateQuizFromPDF = async (req, res) => {
     const dataBuffer =
       fs.readFileSync(req.file.path);
 
-    const parser=pdfParse.default || pdfParse;
       const pdfData =
-      await parser(dataBuffer);
+      await pdfParser(dataBuffer);
 
     const pdfText =
       pdfData.text.slice(0, 6000);
