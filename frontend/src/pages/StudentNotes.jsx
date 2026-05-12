@@ -12,6 +12,17 @@ export default function StudentNotes() {
 
   const [search, setSearch] = useState("");
 
+  // ================= QUIZ STATES =================
+
+  const [quizLoading, setQuizLoading] =
+    useState(false);
+
+  const [quizData, setQuizData] =
+    useState([]);
+
+  const [selectedNote, setSelectedNote] =
+    useState("");
+
   // ================= FETCH NOTES =================
 
   useEffect(() => {
@@ -51,6 +62,92 @@ export default function StudentNotes() {
           search.toLowerCase()
         )
     );
+
+  // ================= PDF QUIZ GENERATOR =================
+
+  const generateQuiz = async (note) => {
+
+    try {
+
+      setQuizLoading(true);
+
+      setSelectedNote(note.title);
+
+      setQuizData([]);
+
+      // ================= FETCH PDF =================
+
+      const pdfResponse =
+        await fetch(
+
+          `https://edu-planner-backrnd.onrender.com${note.fileUrl}`
+
+        );
+
+      const pdfBlob =
+        await pdfResponse.blob();
+
+      // ================= CREATE FORM DATA =================
+
+      const formData =
+        new FormData();
+
+      formData.append(
+        "file",
+        pdfBlob,
+        `${note.title}.pdf`
+      );
+
+      // ================= SEND TO AI =================
+
+      const response =
+        await API.post(
+
+          "/ai/generate-pdf-quiz",
+
+          formData,
+
+          {
+
+            headers: {
+
+              "Content-Type":
+                "multipart/form-data",
+
+            },
+
+          }
+
+        );
+
+      if (
+        response.data.success
+      ) {
+
+        setQuizData(
+          response.data.quiz
+        );
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "PDF Quiz Error:",
+        error
+      );
+
+      alert(
+        "Failed to generate AI PDF quiz"
+      );
+
+    } finally {
+
+      setQuizLoading(false);
+
+    }
+
+  };
 
   return (
 
@@ -210,49 +307,230 @@ export default function StudentNotes() {
 
             </p>
 
-            {/* VIEW BUTTON */}
+            {/* BUTTONS */}
 
-            <a
-
-              href={`https://edu-planner-backrnd.onrender.com${note.fileUrl}`}
-
-              target="_blank"
-
-              rel="noopener noreferrer"
-
+            <div
               style={{
-
-                display: "inline-block",
-
+                display: "flex",
+                gap: "12px",
                 marginTop: "20px",
-
-                padding:
-                  "12px 18px",
-
-                borderRadius: "14px",
-
-                background:
-                  "linear-gradient(90deg,#00ff99,#00c3ff)",
-
-                color: "#000",
-
-                textDecoration: "none",
-
-                fontWeight: "700",
-
+                flexWrap: "wrap",
               }}
-
             >
 
-              📥 Open Note
+              {/* OPEN NOTE */}
 
-            </a>
+              <a
+
+                href={`https://edu-planner-backrnd.onrender.com${note.fileUrl}`}
+
+                target="_blank"
+
+                rel="noopener noreferrer"
+
+                style={{
+
+                  padding:
+                    "12px 18px",
+
+                  borderRadius: "14px",
+
+                  background:
+                    "linear-gradient(90deg,#00ff99,#00c3ff)",
+
+                  color: "#000",
+
+                  textDecoration: "none",
+
+                  fontWeight: "700",
+
+                }}
+
+              >
+
+                📥 Open Note
+
+              </a>
+
+              {/* AI PDF QUIZ */}
+
+              <button
+
+                onClick={() =>
+                  generateQuiz(
+                    note
+                  )
+                }
+
+                style={{
+
+                  padding:
+                    "12px 18px",
+
+                  borderRadius: "14px",
+
+                  border: "none",
+
+                  background:
+                    "linear-gradient(90deg,#ff9a00,#ff2d55)",
+
+                  color: "#fff",
+
+                  fontWeight: "700",
+
+                  cursor: "pointer",
+
+                }}
+
+              >
+
+                🧠 Generate AI Quiz
+
+              </button>
+
+            </div>
 
           </div>
 
         ))}
 
       </div>
+
+      {/* ================= QUIZ SECTION ================= */}
+
+      {selectedNote && (
+
+        <div
+          className="card"
+          style={{
+            marginTop: "40px",
+            borderRadius: "28px",
+          }}
+        >
+
+          <h2>
+
+            🧠 AI Quiz:
+            {" "}
+            {selectedNote}
+
+          </h2>
+
+          {quizLoading && (
+
+            <p
+              style={{
+                marginTop: "20px",
+              }}
+            >
+
+              AI is reading PDF and generating quiz...
+
+            </p>
+
+          )}
+
+          {!quizLoading &&
+            quizData.length > 0 && (
+
+            <div
+              style={{
+                marginTop: "25px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "24px",
+              }}
+            >
+
+              {quizData.map(
+                (q, index) => (
+
+                  <div
+                    key={index}
+                    style={{
+                      padding: "20px",
+                      borderRadius:
+                        "18px",
+                      background:
+                        "rgba(255,255,255,0.04)",
+                    }}
+                  >
+
+                    <h3>
+
+                      Q{index + 1}.
+                      {" "}
+                      {q.question}
+
+                    </h3>
+
+                    <div
+                      style={{
+                        marginTop:
+                          "14px",
+                        display: "flex",
+                        flexDirection:
+                          "column",
+                        gap: "10px",
+                      }}
+                    >
+
+                      {q.options.map(
+                        (
+                          option,
+                          i
+                        ) => (
+
+                          <div
+                            key={i}
+                            style={{
+                              padding:
+                                "10px",
+                              borderRadius:
+                                "12px",
+                              background:
+                                "rgba(255,255,255,0.05)",
+                            }}
+                          >
+
+                            {option}
+
+                          </div>
+
+                        )
+                      )}
+
+                    </div>
+
+                    <p
+                      style={{
+                        marginTop:
+                          "16px",
+                        color:
+                          "#00ff99",
+                        fontWeight:
+                          "700",
+                      }}
+                    >
+
+                      ✅ Answer:
+                      {" "}
+                      {q.answer}
+
+                    </p>
+
+                  </div>
+
+                )
+              )}
+
+            </div>
+
+          )}
+
+        </div>
+
+      )}
 
     </DashboardLayout>
 

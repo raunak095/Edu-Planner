@@ -1,4 +1,6 @@
 import OpenAI from "openai";
+import fs from "fs";
+import pdfParse from "pdf-parse";
 
 // ================= OPENROUTER CLIENT =================
 
@@ -85,11 +87,9 @@ Format:
 
     console.log("RAW AI RESPONSE:", text);
 
-    // Remove markdown if AI still sends it
     text =
       text.replace(/```json|```/g, "").trim();
 
-    // Safety check
     if (!text.startsWith("[")) {
 
       return res.status(500).json({
@@ -287,6 +287,138 @@ Format:
       success: false,
 
       message: "Quiz generation failed",
+
+      error: error.message,
+
+    });
+
+  }
+
+};
+
+// ================= PDF QUIZ GENERATOR =================
+
+export const generateQuizFromPDF = async (req, res) => {
+
+  try {
+
+    if (!req.file) {
+
+      return res.status(400).json({
+
+        success: false,
+
+        message: "PDF file required",
+
+      });
+
+    }
+
+    // ================= READ PDF =================
+
+    const dataBuffer =
+      fs.readFileSync(req.file.path);
+
+    const pdfData =
+      await pdfParse(dataBuffer);
+
+    const pdfText =
+      pdfData.text.slice(0, 6000);
+
+    console.log(
+      "PDF TEXT EXTRACTED"
+    );
+
+    // ================= AI REQUEST =================
+
+    const completion =
+      await client.chat.completions.create({
+
+        model: "google/gemini-2.0-flash-001",
+
+        messages: [
+
+          {
+
+            role: "user",
+
+            content: `
+Generate 5 MCQ quiz questions from this study material.
+
+Study Material:
+${pdfText}
+
+Return ONLY valid raw JSON.
+
+Format:
+[
+  {
+    "question": "",
+    "options": [
+      "",
+      "",
+      "",
+      ""
+    ],
+    "answer": ""
+  }
+]
+            `,
+
+          },
+
+        ],
+
+      });
+
+    let text =
+      completion.choices[0].message.content;
+
+    text =
+      text.replace(/```json|```/g, "").trim();
+
+    let parsed;
+
+    try {
+
+      parsed = JSON.parse(text);
+
+    } catch (error) {
+
+      return res.status(500).json({
+
+        success: false,
+
+        message:
+          "Invalid AI quiz JSON",
+
+        raw: text,
+
+      });
+
+    }
+
+    res.status(200).json({
+
+      success: true,
+
+      quiz: parsed,
+
+    });
+
+  } catch (error) {
+
+    console.error(
+      "PDF QUIZ ERROR:",
+      error
+    );
+
+    res.status(500).json({
+
+      success: false,
+
+      message:
+        "PDF quiz generation failed",
 
       error: error.message,
 
