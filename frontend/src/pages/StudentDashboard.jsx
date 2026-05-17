@@ -66,8 +66,79 @@ export default function StudentDashboard() {
   ]);
 
   const [input, setInput] = useState("");
+  // ================= FOCUS TIMER =================
+
+const [minutes, setMinutes] = useState(25);
+
+const [seconds, setSeconds] = useState(0);
+
+const [isActive, setIsActive] = useState(false);
+
+const [sessions, setSessions] = useState(
+
+  Number(localStorage.getItem("focusSessions")) || 0
+
+);
 
   // ================= AUTO SCROLL =================
+  // ================= TIMER EFFECT =================
+
+useEffect(() => {
+
+  let interval = null;
+
+  if (isActive) {
+
+    interval = setInterval(() => {
+
+      if (seconds > 0) {
+
+        setSeconds(seconds - 1);
+
+      }
+
+      if (seconds === 0) {
+
+        if (minutes === 0) {
+
+          clearInterval(interval);
+
+          setIsActive(false);
+
+          setMinutes(25);
+
+          setSeconds(0);
+
+          const updated = sessions + 1;
+
+          setSessions(updated);
+
+          localStorage.setItem(
+            "focusSessions",
+            updated
+          );
+
+          alert(
+            "🎉 Focus Session Completed!"
+          );
+
+        } else {
+
+          setMinutes(minutes - 1);
+
+          setSeconds(59);
+
+        }
+
+      }
+
+    }, 1000);
+
+  }
+
+  return () => clearInterval(interval);
+
+}, [isActive, seconds, minutes]);
 
   useEffect(() => {
 
@@ -253,8 +324,68 @@ export default function StudentDashboard() {
     }
 
   };
+  const badges = [
+
+  {
+    name: "🌱 Beginner",
+    requirement: 1,
+    color:
+      "linear-gradient(135deg,#00ff99,#00c3ff)",
+  },
+
+  {
+    name: "🔥 Consistent Learner",
+    requirement: 5,
+    color:
+      "linear-gradient(135deg,#ff9800,#ff5722)",
+  },
+
+  {
+    name: "⚡ Productivity Master",
+    requirement: 10,
+    color:
+      "linear-gradient(135deg,#ff00cc,#3333ff)",
+  },
+
+  {
+    name: "🧠 Deep Focus Expert",
+    requirement: 25,
+    color:
+      "linear-gradient(135deg,#8e2de2,#4a00e0)",
+  },
+
+  {
+    name: "👑 Study Legend",
+    requirement: 50,
+    color:
+      "linear-gradient(135deg,#ffd700,#ffb300)",
+  },
+
+];
 
   // ================= CHART DATA =================
+  // ================= TIMER FUNCTIONS =================
+
+const startTimer = () => {
+
+  setIsActive(true);
+
+};
+
+const pauseTimer = () => {
+
+  setIsActive(false);
+
+};
+
+const resetTimer = () => {
+
+  setIsActive(false);
+
+  setMinutes(25);
+
+  setSeconds(0);
+};
 
   const data = [
     { name: "Mon", study: 2 },
@@ -580,7 +711,293 @@ export default function StudentDashboard() {
 
       </div>
 
+      {/* ================= ACHIEVEMENTS ================= */}
+
+<div
+  className="card"
+  style={{
+    marginTop: "24px",
+    borderRadius: "24px",
+  }}
+>
+
+  <h3>🏆 Achievement Badges</h3>
+
+  <div
+    style={{
+      display: "grid",
+      gridTemplateColumns:
+        "repeat(auto-fit,minmax(260px,1fr))",
+      gap: "20px",
+      marginTop: "20px",
+      alignItems: "stretch",
+    }}
+  >
+
+    {badges.map((badge, i) => {
+
+      const unlocked =
+        sessions >= badge.requirement;
+
+      return (
+
+        <div
+          key={i}
+          style={{
+            padding: "24px",
+            minHeight: "170px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            overflow: "hidden",
+            borderRadius: "22px",
+            background: unlocked
+
+              ? badge.color
+
+              : "rgba(255,255,255,0.05)",
+
+            color: unlocked
+              ? "#fff"
+              : "rgba(255,255,255,0.4)",
+
+            border: unlocked
+
+              ? "1px solid rgba(255,255,255,0.2)"
+
+              : "1px solid rgba(255,255,255,0.06)",
+
+            transform: unlocked
+              ? "scale(1.02)"
+              : "scale(1)",
+
+            transition: "0.3s ease",
+
+            boxShadow: unlocked
+
+              ? "0 0 20px rgba(0,255,180,0.2)"
+
+              : "none",
+
+          }}
+        >
+
+          <h2
+            style={{
+              fontSize: "24px",
+              lineHeight: "1.4",
+              wordBreak: "break-word",
+            }}
+          >
+
+            {badge.name}
+
+          </h2>
+
+          <p
+            style={{
+              marginTop: "10px",
+              lineHeight: "1.7",
+            }}
+          >
+
+            {unlocked
+
+              ? "✅ Badge Unlocked"
+
+              : `🔒 Complete ${badge.requirement} focus sessions`}
+
+          </p>
+
+        </div>
+
+      );
+
+    })}
+
+  </div>
+
+</div>
       {/* ================= ANNOUNCEMENTS ================= */}
+      {/* ================= AI FOCUS TIMER ================= */}
+
+<div
+  className="card"
+  style={{
+    marginTop: "24px",
+    borderRadius: "24px",
+    background:
+      "linear-gradient(135deg, rgba(0,255,170,0.08), rgba(0,195,255,0.08))",
+    backdropFilter: "blur(14px)",
+  }}
+>
+
+  <h3>⏳ AI Focus Timer</h3>
+
+  <div
+    style={{
+      marginTop: "20px",
+      textAlign: "center",
+    }}
+  >
+
+    <h1
+      style={{
+        fontSize: "72px",
+        fontWeight: "800",
+      }}
+    >
+
+      {String(minutes).padStart(2, "0")}:
+      {String(seconds).padStart(2, "0")}
+
+    </h1>
+
+    <p
+      style={{
+        opacity: 0.7,
+        marginTop: "8px",
+      }}
+    >
+
+      Pomodoro Study Session
+
+    </p>
+
+  </div>
+
+  <div
+    style={{
+      display: "flex",
+      gap: "12px",
+      marginTop: "24px",
+      justifyContent: "center",
+      flexWrap: "wrap",
+    }}
+  >
+
+    <button
+      onClick={startTimer}
+      style={{
+        padding: "12px 18px",
+        borderRadius: "14px",
+        border: "none",
+        cursor: "pointer",
+        fontWeight: "700",
+        background:
+          "linear-gradient(90deg,#00ff99,#00c3ff)",
+      }}
+    >
+
+      ▶ Start
+
+    </button>
+
+    <button
+      onClick={pauseTimer}
+      style={{
+        padding: "12px 18px",
+        borderRadius: "14px",
+        border: "none",
+        cursor: "pointer",
+        fontWeight: "700",
+      }}
+    >
+
+      ⏸ Pause
+
+    </button>
+
+    <button
+      onClick={resetTimer}
+      style={{
+        padding: "12px 18px",
+        borderRadius: "14px",
+        border: "none",
+        cursor: "pointer",
+        fontWeight: "700",
+      }}
+    >
+
+      🔄 Reset
+
+    </button>
+
+  </div>
+
+  <div
+    style={{
+      marginTop: "26px",
+      lineHeight: "1.9",
+    }}
+  >
+
+    <p>
+      🔥 Focus Sessions Completed:
+      {" "}
+      {sessions}
+    </p>
+
+    <p>
+      🧠 Productivity:
+      {" "}
+      {sessions >= 10
+        ? "Excellent"
+        : sessions >= 5
+        ? "Good"
+        : "Average"}
+    </p>
+
+  </div>
+{/* ================= FOCUS MUSIC ================= */}
+
+<div
+  className="card"
+  style={{
+    marginTop: "24px",
+    borderRadius: "24px",
+    background:
+      "linear-gradient(135deg, rgba(255,0,150,0.08), rgba(0,195,255,0.08))",
+    backdropFilter: "blur(14px)",
+  }}
+>
+
+  <h3>🎵 Focus Music</h3>
+
+  <p
+    style={{
+      marginTop: "10px",
+      opacity: 0.7,
+    }}
+  >
+
+    Relax and study with AI-selected lo-fi beats.
+
+  </p>
+
+  <div
+    style={{
+      marginTop: "20px",
+      borderRadius: "18px",
+      overflow: "hidden",
+    }}
+  >
+
+    <iframe
+      width="100%"
+      height="300"
+      src="https://www.youtube.com/embed/jfKfPfyJRdk"
+      title="LoFi Music"
+      frameBorder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowFullScreen
+    />
+
+  </div>
+
+</div>
+
+</div>
 
       <div
         className="card"

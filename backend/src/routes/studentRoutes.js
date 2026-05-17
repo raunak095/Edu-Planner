@@ -1,9 +1,17 @@
 import express from "express";
 
 import {
+
   createStudent,
+
   getStudents,
+
   deleteStudent,
+
+  getStudentSettings,
+
+  updateStudentSettings,
+
 } from "../controllers/studentController.js";
 
 const router = express.Router();
@@ -24,6 +32,20 @@ router.get(
 router.delete(
   "/:id",
   deleteStudent
+);
+
+// ================= GET SETTINGS =================
+
+router.get(
+  "/settings/:id",
+  getStudentSettings
+);
+
+// ================= UPDATE SETTINGS =================
+
+router.put(
+  "/settings/:id",
+  updateStudentSettings
 );
 
 export default router;

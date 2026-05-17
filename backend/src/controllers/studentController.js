@@ -33,6 +33,23 @@ export const createStudent = async (req, res) => {
     const newStudent = new Student({
       name,
       email,
+
+      // ================= DEFAULT SETTINGS =================
+
+      settings: {
+
+        focusDuration: 25,
+
+        dailyGoal: 4,
+
+        musicAutoplay: true,
+
+        notifications: true,
+
+        aiMode: "Balanced",
+
+      },
+
     });
 
     await newStudent.save();
@@ -114,3 +131,121 @@ export const deleteStudent = async (
     });
   }
 };
+
+// ================= GET STUDENT SETTINGS =================
+
+export const getStudentSettings = async (
+  req,
+  res
+) => {
+
+  try {
+
+    const { id } = req.params;
+
+    const student =
+      await Student.findById(id);
+
+    if (!student) {
+
+      return res.status(404).json({
+        message: "Student not found",
+      });
+    }
+
+    res.status(200).json(
+      student.settings
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Get Settings Error:",
+      error
+    );
+
+    res.status(500).json({
+      message: "Failed to fetch settings",
+    });
+  }
+};
+
+// ================= UPDATE STUDENT SETTINGS =================
+
+export const updateStudentSettings =
+  async (req, res) => {
+
+    try {
+
+      const { id } = req.params;
+
+      const {
+
+        focusDuration,
+
+        dailyGoal,
+
+        musicAutoplay,
+
+        notifications,
+
+        aiMode,
+
+      } = req.body;
+
+      const updatedStudent =
+        await Student.findByIdAndUpdate(
+
+          id,
+
+          {
+
+            settings: {
+
+              focusDuration,
+
+              dailyGoal,
+
+              musicAutoplay,
+
+              notifications,
+
+              aiMode,
+
+            },
+
+          },
+
+          { new: true }
+
+        );
+
+      if (!updatedStudent) {
+
+        return res.status(404).json({
+          message: "Student not found",
+        });
+      }
+
+      res.status(200).json({
+
+        message:
+          "Settings updated successfully",
+
+        settings:
+          updatedStudent.settings,
+
+      });
+
+    } catch (error) {
+
+      console.error(
+        "Update Settings Error:",
+        error
+      );
+
+      res.status(500).json({
+        message: "Failed to update settings",
+      });
+    }
+  };
