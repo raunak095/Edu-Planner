@@ -14,46 +14,32 @@ import roadmapRoutes from "./routes/roadmapRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 
-// 👨‍🏫 Teacher Routes
 import teacherRoutes from "./routes/teacherRoutes.js";
-
-// 📚 Course Routes
 import courseRoutes from "./routes/courseRoutes.js";
-
-// 📂 Note Routes
 import noteRoutes from "./routes/noteRoutes.js";
-
-// 📢 Announcement Routes
 import announcementRoutes from "./routes/announcementRoutes.js";
-
-// 👨‍🎓 Student Routes
 import studentRoutes from "./routes/studentRoutes.js";
-
-// 👨‍💼 Admin Routes
 import adminRoutes from "./routes/adminRoutes.js";
 
-// ✅ FIXED IMPORTS
 import topicRoutes from "./routes/topicRoutes.js";
 import resourceRoutes from "./routes/resourceRoutes.js";
 import fileRoutes from "./routes/fileRoutes.js";
 
 const app = express();
 
-// ================= HTTP SERVER =================
+// ================= SERVER =================
 
 const httpServer = createServer(app);
 
-// ================= SOCKET SERVER =================
+// ================= SOCKET =================
 
 const io = new Server(httpServer, {
 
   cors: {
 
-    origin: true,
+    origin: "*",
 
     methods: ["GET", "POST"],
-
-    credentials: true,
 
   },
 
@@ -61,7 +47,12 @@ const io = new Server(httpServer, {
 
 // ================= ONLINE USERS =================
 
-let onlineUsers = [];
+// store like:
+// {
+//   socketId: userId
+// }
+
+const onlineUsers = {};
 
 // ================= SOCKET CONNECTION =================
 
@@ -76,15 +67,16 @@ io.on("connection", (socket) => {
 
   socket.on("user-online", (userId) => {
 
-    if (!onlineUsers.includes(userId)) {
+    onlineUsers[socket.id] = userId;
 
-      onlineUsers.push(userId);
-
-    }
+    console.log(
+      "✅ Online Users:",
+      Object.values(onlineUsers)
+    );
 
     io.emit(
       "online-users",
-      onlineUsers
+      Object.values(onlineUsers)
     );
 
   });
@@ -92,6 +84,11 @@ io.on("connection", (socket) => {
   // ================= SEND MESSAGE =================
 
   socket.on("send-message", (data) => {
+
+    console.log(
+      "📩 Message:",
+      data
+    );
 
     io.emit("receive-message", {
 
@@ -123,6 +120,13 @@ io.on("connection", (socket) => {
       socket.id
     );
 
+    delete onlineUsers[socket.id];
+
+    io.emit(
+      "online-users",
+      Object.values(onlineUsers)
+    );
+
   });
 
 });
@@ -133,80 +137,52 @@ app.use(cors());
 
 app.use(express.json());
 
-// ✅ FIXED STATIC UPLOADS PATH
-
 app.use(
 
   "/uploads",
 
   express.static(
-
     path.join(process.cwd(), "uploads")
-
   )
 
 );
 
 // ================= ROUTES =================
 
-// 🗺️ Roadmap Routes
-
 app.use("/api/roadmap", roadmapRoutes);
-
-// 📚 Topic Routes
 
 app.use("/api/topics", topicRoutes);
 
-// 📦 Resource Routes
-
 app.use("/api", resourceRoutes);
-
-// 📁 File Routes
 
 app.use("/api/files", fileRoutes);
 
-// 🤖 AI Routes
-
 app.use("/api/ai", aiRoutes);
-
-// 🔐 Auth Routes
 
 app.use("/api/auth", authRoutes);
 
-// 👨‍🏫 Teacher Routes
-
 app.use("/api/teacher", teacherRoutes);
-
-// 📚 Course Routes
 
 app.use("/api/courses", courseRoutes);
 
-// 📂 Note Routes
-
 app.use("/api/notes", noteRoutes);
-
-// 📢 Announcement Routes
 
 app.use(
   "/api/announcements",
   announcementRoutes
 );
 
-// 👨‍🎓 Student Routes
-
 app.use(
   "/api/students",
   studentRoutes
 );
-
-// 👨‍💼 Admin Routes
 
 app.use(
   "/api/admin",
   adminRoutes
 );
 
-// ================= TEST ROUTE =================
+// ================= TEST =================
 
 app.get("/test", (req, res) => {
 
@@ -214,25 +190,11 @@ app.get("/test", (req, res) => {
 
 });
 
-// ================= DEBUG MIDDLEWARE =================
-
-app.use("/api/ai", (req, res, next) => {
-
-  console.log(
-    "🔥 AI ROUTE HIT:",
-    req.method,
-    req.url
-  );
-
-  next();
-
-});
-
-// ================= DATABASE CONNECTION =================
+// ================= DB =================
 
 connectDB();
 
-// ================= SERVER START =================
+// ================= START =================
 
 const PORT = process.env.PORT || 5000;
 
