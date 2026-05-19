@@ -17,6 +17,8 @@ export default function Signup() {
       useLocation().search
     ).get("role");
 
+  // ================= FORM STATE =================
+
   const [form, setForm] = useState({
 
     name: "",
@@ -27,6 +29,8 @@ export default function Signup() {
 
   const [loading, setLoading] =
     useState(false);
+
+  // ================= HANDLE INPUT =================
 
   const handleChange = (e) => {
 
@@ -45,13 +49,17 @@ export default function Signup() {
 
   const sendOTP = async () => {
 
+    // ================= VALIDATION =================
+
     if (
       !form.name ||
       !form.email ||
       !form.password
     ) {
 
-      alert("Please fill all fields");
+      alert(
+        "Please fill all fields"
+      );
 
       return;
 
@@ -61,32 +69,50 @@ export default function Signup() {
 
       setLoading(true);
 
+      // ================= API CALL =================
+
       const res = await API.post(
+
         "/auth/register",
+
         {
 
           name: form.name,
+
           email: form.email,
+
           password: form.password,
+
           role,
 
         }
+
       );
 
-      // ✅ SHOW OTP DIRECTLY
-      alert(`Your OTP is: ${res.data.otp}`);
+      // ================= SUCCESS =================
+
+      alert(
+        "OTP sent successfully to your email"
+      );
+
+      // ================= NAVIGATE OTP PAGE =================
 
       navigate("/otp", {
 
         state: {
+
           email: form.email,
+
         },
 
       });
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "SIGNUP ERROR:",
+        error
+      );
 
       alert(
 
@@ -104,6 +130,8 @@ export default function Signup() {
 
   };
 
+  // ================= UI =================
+
   return (
 
     <>
@@ -117,6 +145,8 @@ export default function Signup() {
             {role?.toUpperCase()} SIGNUP
           </h2>
 
+          {/* ================= NAME ================= */}
+
           <input
             className="input"
             name="name"
@@ -125,13 +155,18 @@ export default function Signup() {
             onChange={handleChange}
           />
 
+          {/* ================= EMAIL ================= */}
+
           <input
             className="input"
+            type="email"
             name="email"
             placeholder="Email"
             value={form.email}
             onChange={handleChange}
           />
+
+          {/* ================= PASSWORD ================= */}
 
           <input
             className="input"
@@ -141,6 +176,8 @@ export default function Signup() {
             value={form.password}
             onChange={handleChange}
           />
+
+          {/* ================= BUTTON ================= */}
 
           <button
             className="btn"
@@ -153,6 +190,8 @@ export default function Signup() {
               : "Send OTP"}
 
           </button>
+
+          {/* ================= LOGIN LINK ================= */}
 
           <p
             className="link"
@@ -172,4 +211,5 @@ export default function Signup() {
       </div>
     </>
   );
+
 }

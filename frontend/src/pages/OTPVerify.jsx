@@ -17,8 +17,12 @@ export default function OTPVerify() {
 
   const location = useLocation();
 
+  // ================= EMAIL =================
+
   const email =
     location.state?.email || "";
+
+  // ================= STATES =================
 
   const [otp, setOtp] =
     useState("");
@@ -30,9 +34,13 @@ export default function OTPVerify() {
 
   const verifyOTP = async () => {
 
+    // ================= VALIDATION =================
+
     if (!otp) {
 
-      alert("Please enter OTP");
+      alert(
+        "Please enter OTP"
+      );
 
       return;
 
@@ -42,22 +50,33 @@ export default function OTPVerify() {
 
       setLoading(true);
 
+      // ================= API CALL =================
+
       const res = await API.post(
+
         "/auth/verify-otp",
+
         {
           email,
           otp,
         }
+
       );
+
+      // ================= SUCCESS =================
 
       alert(res.data.message);
 
-      // ✅ Redirect to Login
+      // ================= REDIRECT =================
+
       navigate("/login");
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "OTP VERIFY ERROR:",
+        error
+      );
 
       alert(
 
@@ -74,6 +93,8 @@ export default function OTPVerify() {
     }
 
   };
+
+  // ================= UI =================
 
   return (
 
@@ -99,6 +120,8 @@ export default function OTPVerify() {
 
           </p>
 
+          {/* ================= OTP INPUT ================= */}
+
           <input
             className="input"
             placeholder="Enter OTP"
@@ -107,6 +130,8 @@ export default function OTPVerify() {
               setOtp(e.target.value)
             }
           />
+
+          {/* ================= VERIFY BUTTON ================= */}
 
           <button
             className="btn"
@@ -125,4 +150,5 @@ export default function OTPVerify() {
       </div>
     </>
   );
+
 }

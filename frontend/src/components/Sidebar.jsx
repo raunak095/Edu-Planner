@@ -1,8 +1,76 @@
 import { useNavigate } from "react-router-dom";
 
+import { useEffect, useState } from "react";
+
+import { io } from "socket.io-client";
+
+// ================= SOCKET =================
+
+const socket = io(
+  import.meta.env.VITE_SOCKET_URL,
+  {
+    transports: ["websocket"],
+  }
+);
+
 export default function Sidebar({ role }) {
 
   const navigate = useNavigate();
+
+  // ================= STATES =================
+
+  const [onlineUsers, setOnlineUsers] =
+    useState([]);
+
+  const [unreadMessages, setUnreadMessages] =
+    useState(0);
+
+  // ================= USER =================
+
+  const user = JSON.parse(
+    localStorage.getItem("user")
+  );
+
+  // ================= SOCKET =================
+
+  useEffect(() => {
+
+    if (user?._id) {
+
+      socket.emit(
+        "user-online",
+        user._id
+      );
+
+    }
+
+    socket.on(
+      "online-users",
+      (users) => {
+
+        setOnlineUsers(users);
+
+      }
+    );
+
+    socket.on(
+      "receive-message",
+      () => {
+
+        setUnreadMessages((prev) => prev + 1);
+
+      }
+    );
+
+    return () => {
+
+      socket.off("online-users");
+
+      socket.off("receive-message");
+
+    };
+
+  }, []);
 
   // ================= LOGOUT =================
 
@@ -20,7 +88,57 @@ export default function Sidebar({ role }) {
 
     <div className="sidebar">
 
-      <h2>EduPlanner</h2>
+      {/* ================= LOGO ================= */}
+
+      <h2
+        style={{
+          background:
+            "linear-gradient(90deg,#00ff99,#00c3ff)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          fontWeight: "800",
+        }}
+      >
+
+        EduPlanner
+
+      </h2>
+
+      {/* ================= ONLINE STATUS ================= */}
+
+      <div
+
+        style={{
+
+          marginTop: "18px",
+
+          marginBottom: "24px",
+
+          padding: "12px",
+
+          borderRadius: "16px",
+
+          background:
+            "rgba(0,255,170,0.08)",
+
+          border:
+            "1px solid rgba(0,255,170,0.15)",
+
+          textAlign: "center",
+
+          fontSize: "14px",
+
+          fontWeight: "600",
+
+        }}
+
+      >
+
+        🟢 Online Users:
+        {" "}
+        {onlineUsers.length}
+
+      </div>
 
       {/* ================= STUDENT SIDEBAR ================= */}
 
@@ -55,8 +173,6 @@ export default function Sidebar({ role }) {
             🗺️ Roadmap
           </div>
 
-          {/* ================= NEW NOTES MENU ================= */}
-
           <div
             className="menu-item"
             onClick={() =>
@@ -75,6 +191,73 @@ export default function Sidebar({ role }) {
             }
           >
             📢 Announcements
+          </div>
+
+          {/* ================= LIVE CHAT ================= */}
+
+          <div
+            className="menu-item"
+            onClick={() => {
+
+              setUnreadMessages(0);
+
+              navigate(
+                "/student/messages"
+              );
+
+            }}
+            style={{
+              position: "relative",
+            }}
+          >
+
+            💬 Live Chat
+
+            {unreadMessages > 0 && (
+
+              <span
+
+                style={{
+
+                  position: "absolute",
+
+                  right: "12px",
+
+                  top: "10px",
+
+                  minWidth: "22px",
+
+                  height: "22px",
+
+                  borderRadius: "50%",
+
+                  background:
+                    "linear-gradient(90deg,#ff4b2b,#ff416c)",
+
+                  color: "#fff",
+
+                  display: "flex",
+
+                  alignItems: "center",
+
+                  justifyContent: "center",
+
+                  fontSize: "12px",
+
+                  fontWeight: "700",
+
+                  padding: "4px",
+
+                }}
+
+              >
+
+                {unreadMessages}
+
+              </span>
+
+            )}
+
           </div>
 
           <div
@@ -145,6 +328,73 @@ export default function Sidebar({ role }) {
             📢 Announcements
           </div>
 
+          {/* ================= TEACHER CHAT ================= */}
+
+          <div
+            className="menu-item"
+            onClick={() => {
+
+              setUnreadMessages(0);
+
+              navigate(
+                "/teacher/messages"
+              );
+
+            }}
+            style={{
+              position: "relative",
+            }}
+          >
+
+            💬 Live Chat
+
+            {unreadMessages > 0 && (
+
+              <span
+
+                style={{
+
+                  position: "absolute",
+
+                  right: "12px",
+
+                  top: "10px",
+
+                  minWidth: "22px",
+
+                  height: "22px",
+
+                  borderRadius: "50%",
+
+                  background:
+                    "linear-gradient(90deg,#ff4b2b,#ff416c)",
+
+                  color: "#fff",
+
+                  display: "flex",
+
+                  alignItems: "center",
+
+                  justifyContent: "center",
+
+                  fontSize: "12px",
+
+                  fontWeight: "700",
+
+                  padding: "4px",
+
+                }}
+
+              >
+
+                {unreadMessages}
+
+              </span>
+
+            )}
+
+          </div>
+
         </>
 
       )}
@@ -209,8 +459,15 @@ export default function Sidebar({ role }) {
       <div
         className="menu-item"
         onClick={handleLogout}
+        style={{
+          marginTop: "24px",
+          color: "#ff5b5b",
+          fontWeight: "700",
+        }}
       >
+
         🚪 Logout
+
       </div>
 
     </div>

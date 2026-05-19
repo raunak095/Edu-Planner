@@ -7,13 +7,19 @@ export default function ProtectedRoute({
 
 }) {
 
-  // ✅ Get User from LocalStorage
-  const user = JSON.parse(
-    localStorage.getItem("user")
-  );
+  // ================= GET AUTH =================
 
-  // ✅ If no user → go login
-  if (!user) {
+  const token =
+    localStorage.getItem("token");
+
+  const user =
+    JSON.parse(
+      localStorage.getItem("user")
+    );
+
+  // ================= NOT LOGGED IN =================
+
+  if (!token || !user) {
 
     return (
       <Navigate to="/login" />
@@ -21,10 +27,14 @@ export default function ProtectedRoute({
 
   }
 
-  // ✅ Role mismatch
+  // ================= ROLE MISMATCH =================
+
   if (
+
     allowedRole &&
+
     user.role !== allowedRole
+
   ) {
 
     return (
@@ -33,7 +43,8 @@ export default function ProtectedRoute({
 
   }
 
-  // ✅ Authorized
+  // ================= AUTHORIZED =================
+
   return children;
 
 }

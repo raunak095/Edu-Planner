@@ -351,19 +351,31 @@ export default function StudentSettings() {
 
           >
 
-            <option value="Balanced">
+            <option value="Balanced"style={{
+    background: "#1e1e2f",
+    color: "white",
+  }}>
               Balanced
             </option>
 
-            <option value="Strict Coach">
+            <option value="Strict Coach"style={{
+    background: "#1e1e2f",
+    color: "white",
+  }}>
               Strict Coach
             </option>
 
-            <option value="Friendly Mentor">
+            <option value="Friendly Mentor"style={{
+    background: "#1e1e2f",
+    color: "white",
+  }}>
               Friendly Mentor
             </option>
 
-            <option value="Exam Mode">
+            <option value="Exam Mode"style={{
+    background: "#1e1e2f",
+    color: "white",
+  }}>
               Exam Mode
             </option>
 

@@ -22,6 +22,8 @@ export default function Login() {
       location.search
     ).get("role");
 
+  // ================= FORM STATE =================
+
   const [form, setForm] = useState({
 
     email: "",
@@ -31,6 +33,8 @@ export default function Login() {
 
   const [loading, setLoading] =
     useState(false);
+
+  // ================= HANDLE INPUT =================
 
   const handleChange = (e) => {
 
@@ -49,6 +53,8 @@ export default function Login() {
 
   const handleLogin = async () => {
 
+    // ================= VALIDATION =================
+
     if (
       !form.email ||
       !form.password
@@ -66,20 +72,26 @@ export default function Login() {
 
       setLoading(true);
 
+      // ================= API CALL =================
+
       const res = await API.post(
         "/auth/login",
         form
       );
 
+      // ================= SUCCESS =================
+
       alert(res.data.message);
 
-      // ✅ Store Token
+      // ================= STORE TOKEN =================
+
       localStorage.setItem(
         "token",
         res.data.token
       );
 
-      // ✅ Store User
+      // ================= STORE USER =================
+
       localStorage.setItem(
         "user",
         JSON.stringify(
@@ -87,44 +99,56 @@ export default function Login() {
         )
       );
 
+      // ================= STORE ROLE =================
+
+      localStorage.setItem(
+        "role",
+        res.data.user.role
+      );
+
       // ================= ROLE REDIRECT =================
 
       const userRole =
         res.data.user.role;
 
-      if (
-        userRole === "student"
-      ) {
+      switch (userRole) {
 
-        navigate(
-          "/student/dashboard"
-        );
+        case "student":
 
-      }
+          navigate(
+            "/student/dashboard"
+          );
 
-      else if (
-        userRole === "teacher"
-      ) {
+          break;
 
-        navigate(
-          "/teacher/dashboard"
-        );
+        case "teacher":
 
-      }
+          navigate(
+            "/teacher/dashboard"
+          );
 
-      else if (
-        userRole === "admin"
-      ) {
+          break;
 
-        navigate(
-          "/admin/dashboard"
-        );
+        case "admin":
+
+          navigate(
+            "/admin/dashboard"
+          );
+
+          break;
+
+        default:
+
+          navigate("/");
 
       }
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "LOGIN ERROR:",
+        error
+      );
 
       alert(
 
@@ -142,6 +166,8 @@ export default function Login() {
 
   };
 
+  // ================= UI =================
+
   return (
 
     <>
@@ -155,6 +181,8 @@ export default function Login() {
             {role?.toUpperCase()} LOGIN
           </h2>
 
+          {/* ================= EMAIL ================= */}
+
           <input
             className="input"
             type="email"
@@ -164,6 +192,8 @@ export default function Login() {
             onChange={handleChange}
           />
 
+          {/* ================= PASSWORD ================= */}
+
           <input
             className="input"
             type="password"
@@ -172,6 +202,8 @@ export default function Login() {
             value={form.password}
             onChange={handleChange}
           />
+
+          {/* ================= LOGIN BUTTON ================= */}
 
           <button
             className="btn"
@@ -184,6 +216,8 @@ export default function Login() {
               : "Login"}
 
           </button>
+
+          {/* ================= SIGNUP LINK ================= */}
 
           <p
             className="link"
@@ -204,4 +238,5 @@ export default function Login() {
       </div>
     </>
   );
+
 }

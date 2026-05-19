@@ -4,6 +4,10 @@ import express from "express";
 import cors from "cors";
 import path from "path";
 
+import { createServer } from "http";
+
+import { Server } from "socket.io";
+
 import connectDB from "./config/db.js";
 
 import roadmapRoutes from "./routes/roadmapRoutes.js";
@@ -35,67 +39,175 @@ import fileRoutes from "./routes/fileRoutes.js";
 
 const app = express();
 
+// ================= HTTP SERVER =================
+
+const httpServer = createServer(app);
+
+// ================= SOCKET SERVER =================
+
+const io = new Server(httpServer, {
+
+  cors: {
+
+    origin: true,
+
+    methods: ["GET", "POST"],
+
+    credentials: true,
+
+  },
+
+});
+
+// ================= ONLINE USERS =================
+
+let onlineUsers = [];
+
+// ================= SOCKET CONNECTION =================
+
+io.on("connection", (socket) => {
+
+  console.log(
+    "🟢 User Connected:",
+    socket.id
+  );
+
+  // ================= USER ONLINE =================
+
+  socket.on("user-online", (userId) => {
+
+    if (!onlineUsers.includes(userId)) {
+
+      onlineUsers.push(userId);
+
+    }
+
+    io.emit(
+      "online-users",
+      onlineUsers
+    );
+
+  });
+
+  // ================= SEND MESSAGE =================
+
+  socket.on("send-message", (data) => {
+
+    io.emit("receive-message", {
+
+      ...data,
+
+      createdAt: new Date(),
+
+    });
+
+  });
+
+  // ================= TYPING =================
+
+  socket.on("typing", (data) => {
+
+    socket.broadcast.emit(
+      "typing",
+      data
+    );
+
+  });
+
+  // ================= DISCONNECT =================
+
+  socket.on("disconnect", () => {
+
+    console.log(
+      "🔴 User Disconnected:",
+      socket.id
+    );
+
+  });
+
+});
+
 // ================= MIDDLEWARE =================
+
 app.use(cors());
 
 app.use(express.json());
 
 // ✅ FIXED STATIC UPLOADS PATH
+
 app.use(
+
   "/uploads",
+
   express.static(
+
     path.join(process.cwd(), "uploads")
+
   )
+
 );
 
 // ================= ROUTES =================
 
 // 🗺️ Roadmap Routes
+
 app.use("/api/roadmap", roadmapRoutes);
 
 // 📚 Topic Routes
+
 app.use("/api/topics", topicRoutes);
 
 // 📦 Resource Routes
+
 app.use("/api", resourceRoutes);
 
 // 📁 File Routes
+
 app.use("/api/files", fileRoutes);
 
 // 🤖 AI Routes
+
 app.use("/api/ai", aiRoutes);
 
 // 🔐 Auth Routes
+
 app.use("/api/auth", authRoutes);
 
 // 👨‍🏫 Teacher Routes
+
 app.use("/api/teacher", teacherRoutes);
 
 // 📚 Course Routes
+
 app.use("/api/courses", courseRoutes);
 
 // 📂 Note Routes
+
 app.use("/api/notes", noteRoutes);
 
 // 📢 Announcement Routes
+
 app.use(
   "/api/announcements",
   announcementRoutes
 );
 
 // 👨‍🎓 Student Routes
+
 app.use(
   "/api/students",
   studentRoutes
 );
 
 // 👨‍💼 Admin Routes
+
 app.use(
   "/api/admin",
   adminRoutes
 );
 
 // ================= TEST ROUTE =================
+
 app.get("/test", (req, res) => {
 
   res.send("Backend + MongoDB running 🚀");
@@ -103,6 +215,7 @@ app.get("/test", (req, res) => {
 });
 
 // ================= DEBUG MIDDLEWARE =================
+
 app.use("/api/ai", (req, res, next) => {
 
   console.log(
@@ -116,12 +229,14 @@ app.use("/api/ai", (req, res, next) => {
 });
 
 // ================= DATABASE CONNECTION =================
+
 connectDB();
 
 // ================= SERVER START =================
+
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
 
   console.log(
     `🚀 Server running on port ${PORT}`

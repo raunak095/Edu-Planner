@@ -19,6 +19,10 @@ import StudentAnnouncements from "./pages/StudentAnnouncements";
 import StudentSettings from "./pages/StudentSettings";
 import StudentNotes from "./pages/StudentNotes";
 
+/* ================= NEW REALTIME CHAT ================= */
+
+import StudentMessages from "./pages/StudentMessages";
+
 /* ================= TEACHER PAGES ================= */
 
 import TeacherQuizGenerator from "./pages/TeacherQuizGenerator";
@@ -102,8 +106,6 @@ function App() {
           }
         />
 
-        {/* ================= NEW NOTES ROUTE ================= */}
-
         <Route
           path="/student/notes"
           element={
@@ -133,6 +135,19 @@ function App() {
               allowedRole="student"
             >
               <StudentSettings />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ================= NEW STUDENT CHAT ================= */}
+
+        <Route
+          path="/student/messages"
+          element={
+            <ProtectedRoute
+              allowedRole="student"
+            >
+              <StudentMessages />
             </ProtectedRoute>
           }
         />
