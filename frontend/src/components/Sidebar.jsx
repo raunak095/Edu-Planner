@@ -194,6 +194,17 @@ export default function Sidebar({ role }) {
           >
             📢 Announcements
           </div>
+          <div
+  className="menu-item"
+  onClick={() =>
+    window.open(
+      "https://forms.gle/nBhN2BdvmpGKajNn8",
+      "_blank"
+    )
+  }
+>
+  📝 Feedback & Reviews
+</div>
 
           {/* ================= LIVE CHAT ================= */}
 
@@ -320,6 +331,17 @@ export default function Sidebar({ role }) {
           >
             📢 Announcements
           </div>
+          <div
+  className="menu-item"
+  onClick={() =>
+    window.open(
+      "https://forms.gle/nBhN2BdvmpGKajNn8",
+      "_blank"
+    )
+  }
+>
+  📝 Feedback & Reviews
+</div>
 
           <div
             className="menu-item"
@@ -423,6 +445,17 @@ export default function Sidebar({ role }) {
           >
             ⚙️ Settings
           </div>
+          <div
+  className="menu-item"
+  onClick={() =>
+    window.open(
+      "https://forms.gle/nBhN2BdvmpGKajNn8",
+      "_blank"
+    )
+  }
+>
+  📝 Feedback & Reviews
+</div>
 
         </>
 
