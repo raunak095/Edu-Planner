@@ -22,6 +22,7 @@ import StudentNotes from "./pages/StudentNotes";
 /* ================= NEW REALTIME CHAT ================= */
 
 import StudentMessages from "./pages/StudentMessages";
+import VideoRoom from "./pages/VideoRoom";
 
 /* ================= TEACHER PAGES ================= */
 
@@ -151,6 +152,16 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+  path="/student/video-room"
+  element={
+    <ProtectedRoute
+      allowedRole="student"
+    >
+      <VideoRoom />
+    </ProtectedRoute>
+  }
+/>
 
         {/* ================= TEACHER ROUTES ================= */}
 

@@ -244,6 +244,14 @@ export default function Sidebar({ role }) {
             )}
 
           </div>
+          <div
+  className="menu-item"
+  onClick={() =>
+    navigate("/student/video-room")
+  }
+>
+  🎥 Video Room
+</div>
 
           <div
             className="menu-item"
