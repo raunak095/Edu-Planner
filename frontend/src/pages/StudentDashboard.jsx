@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
 import "../styles/auth.css";
 import API from "../api";
+import {io} from "socket.io-client";
 
 import {
   BarChart,
@@ -12,6 +13,12 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+const socket = io(
+  "https://edu-planner-backrnd.onrender.com",
+  {
+    transports: ["websocket"],
+  }
+);
 
 export default function StudentDashboard() {
 
@@ -33,6 +40,8 @@ export default function StudentDashboard() {
 
   // ================= STATS =================
 
+  const [onlineUsers, setOnlineUsers] =
+    useState([]);
   const [stats, setStats] = useState({
 
     subjects: 0,
@@ -147,6 +156,39 @@ useEffect(() => {
     });
 
   }, [messages]);
+  // ================= ONLINE USERS =================
+
+  useEffect(() => {
+
+    const user = JSON.parse(
+      localStorage.getItem("user")
+    );
+
+    if (user?._id) {
+
+      socket.emit(
+        "user-online",
+        user._id
+      );
+
+    }
+
+    socket.on(
+      "online-users",
+      (users) => {
+
+        setOnlineUsers(users);
+
+      }
+    );
+
+    return () => {
+
+      socket.off("online-users");
+
+    };
+
+  }, []);
 
   // ================= LOAD DATA =================
 

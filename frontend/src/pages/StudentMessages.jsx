@@ -4,7 +4,7 @@ import DashboardLayout from "../layouts/DashboardLayout";
 
 import io from "socket.io-client";
 
-const socket = io(import.meta.env.VITE_SOCKET_URL,
+const socket = io("https://edu-planner-backrnd.onrender.com",
     {
         transports: ["websocket"],
 });

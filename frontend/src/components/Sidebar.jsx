@@ -7,7 +7,7 @@ import { io } from "socket.io-client";
 // ================= SOCKET =================
 
 const socket = io(
-  import.meta.env.VITE_SOCKET_URL,
+  "https://edu-planner-backrnd.onrender.com",
   {
     transports: ["websocket"],
   }
@@ -27,19 +27,26 @@ export default function Sidebar({ role }) {
 
   // ================= USER =================
 
-  const user = JSON.parse(
-    localStorage.getItem("user")
-  );
+  const token =
+    localStorage.getItem("token");
+
+  const user = token
+
+    ? JSON.parse(
+        atob(token.split(".")[1])
+      )
+
+    : null;
 
   // ================= SOCKET =================
 
   useEffect(() => {
 
-    if (user?._id) {
+    if (user?.id) {
 
       socket.emit(
         "user-online",
-        user._id
+        user.id
       );
 
     }
@@ -47,6 +54,11 @@ export default function Sidebar({ role }) {
     socket.on(
       "online-users",
       (users) => {
+
+        console.log(
+          "ONLINE USERS:",
+          users
+        );
 
         setOnlineUsers(users);
 
@@ -57,7 +69,9 @@ export default function Sidebar({ role }) {
       "receive-message",
       () => {
 
-        setUnreadMessages((prev) => prev + 1);
+        setUnreadMessages(
+          (prev) => prev + 1
+        );
 
       }
     );
@@ -107,31 +121,19 @@ export default function Sidebar({ role }) {
       {/* ================= ONLINE STATUS ================= */}
 
       <div
-
         style={{
-
           marginTop: "18px",
-
           marginBottom: "24px",
-
           padding: "12px",
-
           borderRadius: "16px",
-
           background:
             "rgba(0,255,170,0.08)",
-
           border:
             "1px solid rgba(0,255,170,0.15)",
-
           textAlign: "center",
-
           fontSize: "14px",
-
           fontWeight: "600",
-
         }}
-
       >
 
         🟢 Online Users:
@@ -216,40 +218,23 @@ export default function Sidebar({ role }) {
             {unreadMessages > 0 && (
 
               <span
-
                 style={{
-
                   position: "absolute",
-
                   right: "12px",
-
                   top: "10px",
-
                   minWidth: "22px",
-
                   height: "22px",
-
                   borderRadius: "50%",
-
                   background:
                     "linear-gradient(90deg,#ff4b2b,#ff416c)",
-
                   color: "#fff",
-
                   display: "flex",
-
                   alignItems: "center",
-
                   justifyContent: "center",
-
                   fontSize: "12px",
-
                   fontWeight: "700",
-
                   padding: "4px",
-
                 }}
-
               >
 
                 {unreadMessages}
@@ -328,8 +313,6 @@ export default function Sidebar({ role }) {
             📢 Announcements
           </div>
 
-          {/* ================= TEACHER CHAT ================= */}
-
           <div
             className="menu-item"
             onClick={() => {
@@ -351,40 +334,23 @@ export default function Sidebar({ role }) {
             {unreadMessages > 0 && (
 
               <span
-
                 style={{
-
                   position: "absolute",
-
                   right: "12px",
-
                   top: "10px",
-
                   minWidth: "22px",
-
                   height: "22px",
-
                   borderRadius: "50%",
-
                   background:
                     "linear-gradient(90deg,#ff4b2b,#ff416c)",
-
                   color: "#fff",
-
                   display: "flex",
-
                   alignItems: "center",
-
                   justifyContent: "center",
-
                   fontSize: "12px",
-
                   fontWeight: "700",
-
                   padding: "4px",
-
                 }}
-
               >
 
                 {unreadMessages}
