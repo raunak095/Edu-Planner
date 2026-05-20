@@ -5,8 +5,6 @@ import Sidebar from "../components/Sidebar";
 
 import { io } from "socket.io-client";
 
-import API from "../api";
-
 // ================= SOCKET =================
 
 const socket = io(
@@ -23,9 +21,6 @@ export default function DashboardLayout({
   // ================= STATES =================
 
   const [onlineUsers, setOnlineUsers] =
-    useState([]);
-
-  const [notifications, setNotifications] =
     useState([]);
 
   // ================= USER =================
@@ -58,35 +53,9 @@ export default function DashboardLayout({
       }
     );
 
-    // ================= LIVE MESSAGES =================
-
-    socket.on(
-      "receive-message",
-      (message) => {
-
-        setNotifications((prev) => [
-
-          {
-
-            text:
-              `💬 New message from ${message.senderName}`,
-
-            time: new Date(),
-
-          },
-
-          ...prev,
-
-        ]);
-
-      }
-    );
-
     return () => {
 
       socket.off("online-users");
-
-      socket.off("receive-message");
 
     };
 
@@ -95,17 +64,23 @@ export default function DashboardLayout({
   return (
 
     <>
+
+      {/* ================= NAVBAR ================= */}
+
       <Navbar />
 
       {/* ================= SIDEBAR ================= */}
 
-      <Sidebar role={role} />
+      <Sidebar
+        role={role}
+        onlineUsers={onlineUsers}
+      />
 
       {/* ================= MAIN CONTENT ================= */}
 
       <div className="main-content">
 
-        {/* ================= TOP REALTIME BAR ================= */}
+        {/* ================= TOP BAR ================= */}
 
         <div
 
@@ -115,13 +90,9 @@ export default function DashboardLayout({
 
             display: "flex",
 
-            justifyContent: "space-between",
+            justifyContent: "flex-end",
 
             alignItems: "center",
-
-            gap: "20px",
-
-            flexWrap: "wrap",
 
           }}
 
@@ -165,81 +136,6 @@ export default function DashboardLayout({
 
           </div>
 
-          {/* ================= NOTIFICATIONS ================= */}
-
-          <div
-
-            style={{
-
-              padding: "14px 18px",
-
-              borderRadius: "18px",
-
-              background:
-                "rgba(0,195,255,0.08)",
-
-              border:
-                "1px solid rgba(0,195,255,0.15)",
-
-              backdropFilter: "blur(14px)",
-
-              color: "#fff",
-
-              minWidth: "280px",
-
-            }}
-
-          >
-
-            <div
-              style={{
-                fontWeight: "700",
-                marginBottom: "8px",
-              }}
-            >
-
-              🔔 Live Notifications
-
-            </div>
-
-            {notifications.length === 0 ? (
-
-              <p
-                style={{
-                  opacity: 0.7,
-                  fontSize: "14px",
-                }}
-              >
-
-                No new notifications
-
-              </p>
-
-            ) : (
-
-              notifications
-                .slice(0, 3)
-                .map((note, i) => (
-
-                  <div
-                    key={i}
-                    style={{
-                      marginBottom: "8px",
-                      fontSize: "14px",
-                      lineHeight: "1.5",
-                    }}
-                  >
-
-                    {note.text}
-
-                  </div>
-
-                ))
-
-            )}
-
-          </div>
-
         </div>
 
         {/* ================= PAGE CONTENT ================= */}
@@ -249,6 +145,7 @@ export default function DashboardLayout({
       </div>
 
     </>
+
   );
 
 }

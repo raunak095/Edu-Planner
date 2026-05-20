@@ -20,7 +20,7 @@ import noteRoutes from "./routes/noteRoutes.js";
 import announcementRoutes from "./routes/announcementRoutes.js";
 import studentRoutes from "./routes/studentRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
-
+import notificationRoutes from "./routes/notificationRoutes.js";
 import topicRoutes from "./routes/topicRoutes.js";
 import resourceRoutes from "./routes/resourceRoutes.js";
 import fileRoutes from "./routes/fileRoutes.js";
@@ -44,6 +44,7 @@ const io = new Server(httpServer, {
   },
 
 });
+app.set("io", io);
 
 // ================= ONLINE USERS =================
 
@@ -180,6 +181,10 @@ app.use(
 app.use(
   "/api/admin",
   adminRoutes
+);
+app.use(
+  "/api/notifications",
+  notificationRoutes
 );
 
 // ================= TEST =================

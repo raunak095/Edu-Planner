@@ -1,5 +1,9 @@
 import Announcement from "../models/Announcement.js";
 
+import Notification from "../models/Notification.js";
+
+import User from "../models/User.js";
+
 // 📢 CREATE ANNOUNCEMENT
 export const createAnnouncement = async (req, res) => {
 
@@ -14,20 +18,71 @@ export const createAnnouncement = async (req, res) => {
     if (!title || !message) {
 
       return res.status(400).json({
-        message: "Title and message are required",
+        message:
+          "Title and message are required",
       });
+
     }
 
     // ✅ Create Announcement
-    const newAnnouncement = new Announcement({
-      title,
-      message,
-    });
+    const newAnnouncement =
+      new Announcement({
 
-    // 💾 Save to MongoDB
+        title,
+        message,
+
+      });
+
+    // 💾 Save Announcement
     await newAnnouncement.save();
 
-    res.status(201).json(newAnnouncement);
+    // ================= GET ALL STUDENTS =================
+
+    const students =
+      await User.find({
+
+        role: "student",
+
+      });
+
+    // ================= CREATE NOTIFICATIONS =================
+
+    const notifications =
+      students.map((student) => ({
+
+        userId: student._id,
+
+        title:
+          "📢 New Announcement",
+
+        message:
+          `${title} - ${message}`,
+
+        type: "announcement",
+
+      }));
+
+    // 💾 Save Notifications
+    await Notification.insertMany(
+      notifications
+    );
+
+    // ================= REALTIME SOCKET =================
+
+    const io = req.app.get("io");
+
+    notifications.forEach((notification) => {
+
+      io.emit(
+        "new-notification",
+        notification
+      );
+
+    });
+
+    res.status(201).json(
+      newAnnouncement
+    );
 
   } catch (error) {
 
@@ -37,22 +92,34 @@ export const createAnnouncement = async (req, res) => {
     );
 
     res.status(500).json({
-      message: "Failed to create announcement",
+
+      message:
+        "Failed to create announcement",
+
     });
+
   }
+
 };
 
 // 📋 GET ALL ANNOUNCEMENTS
-export const getAnnouncements = async (req, res) => {
+export const getAnnouncements = async (
+  req,
+  res
+) => {
 
   try {
 
     const announcements =
       await Announcement.find().sort({
+
         createdAt: -1,
+
       });
 
-    res.status(200).json(announcements);
+    res.status(200).json(
+      announcements
+    );
 
   } catch (error) {
 
@@ -62,9 +129,14 @@ export const getAnnouncements = async (req, res) => {
     );
 
     res.status(500).json({
-      message: "Failed to fetch announcements",
+
+      message:
+        "Failed to fetch announcements",
+
     });
+
   }
+
 };
 
 // ❌ DELETE ANNOUNCEMENT
@@ -78,18 +150,26 @@ export const deleteAnnouncement = async (
     const { id } = req.params;
 
     const deletedAnnouncement =
-      await Announcement.findByIdAndDelete(id);
+      await Announcement.findByIdAndDelete(
+        id
+      );
 
     if (!deletedAnnouncement) {
 
       return res.status(404).json({
-        message: "Announcement not found",
+
+        message:
+          "Announcement not found",
+
       });
+
     }
 
     res.status(200).json({
+
       message:
         "Announcement deleted successfully",
+
     });
 
   } catch (error) {
@@ -100,7 +180,12 @@ export const deleteAnnouncement = async (
     );
 
     res.status(500).json({
-      message: "Failed to delete announcement",
+
+      message:
+        "Failed to delete announcement",
+
     });
+
   }
+
 };
