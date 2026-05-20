@@ -24,7 +24,7 @@ import notificationRoutes from "./routes/notificationRoutes.js";
 import topicRoutes from "./routes/topicRoutes.js";
 import resourceRoutes from "./routes/resourceRoutes.js";
 import fileRoutes from "./routes/fileRoutes.js";
-
+import assignmentRoutes from "./routes/assignmentRoutes.js";
 const app = express();
 
 // ================= SERVER =================
@@ -163,6 +163,10 @@ app.use("/api/ai", aiRoutes);
 app.use("/api/auth", authRoutes);
 
 app.use("/api/teacher", teacherRoutes);
+app.use(
+  "/api/teacher/assignments",
+  assignmentRoutes
+);
 
 app.use("/api/courses", courseRoutes);
 

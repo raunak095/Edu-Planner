@@ -17,6 +17,9 @@ export default function TeacherAssignments() {
   const [deadline, setDeadline] =
     useState("");
 
+  const [assignmentFile, setAssignmentFile] =
+    useState(null);
+
   const [assignments, setAssignments] =
     useState([]);
 
@@ -68,19 +71,55 @@ export default function TeacherAssignments() {
 
     try {
 
+      const formData =
+        new FormData();
+
+      formData.append(
+        "title",
+        title
+      );
+
+      formData.append(
+        "description",
+        description
+      );
+
+      formData.append(
+        "deadline",
+        deadline
+      );
+
+      formData.append(
+        "teacherName",
+        "Teacher"
+      );
+
+      if (assignmentFile) {
+
+        formData.append(
+          "assignmentFile",
+          assignmentFile
+        );
+
+      }
+
       await API.post(
+
         "/teacher/assignments",
+
+        formData,
+
         {
 
-          title,
+          headers: {
 
-          description,
+            "Content-Type":
+              "multipart/form-data",
 
-          deadline,
-
-          teacherName: "Teacher",
+          },
 
         }
+
       );
 
       alert(
@@ -93,11 +132,17 @@ export default function TeacherAssignments() {
 
       setDeadline("");
 
+      setAssignmentFile(null);
+
       fetchAssignments();
 
     } catch (error) {
 
       console.log(error);
+
+      alert(
+        "❌ Failed to create assignment"
+      );
 
     }
 
@@ -137,102 +182,116 @@ export default function TeacherAssignments() {
       {/* ================= CREATE CARD ================= */}
 
       <div
-  className="card"
-  style={{
-    borderRadius: "30px",
-    padding: "34px",
-    maxWidth: "900px",
-    margin: "0 auto",
-    background:
-      "linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03))",
-    backdropFilter: "blur(18px)",
-    border:
-      "1px solid rgba(255,255,255,0.08)",
-    boxShadow:
-      "0 0 30px rgba(0,0,0,0.2)",
-  }}
->
+        className="card"
+        style={{
+          borderRadius: "30px",
+          padding: "34px",
+          maxWidth: "900px",
+          margin: "0 auto",
+          background:
+            "linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03))",
+          backdropFilter: "blur(18px)",
+          border:
+            "1px solid rgba(255,255,255,0.08)",
+          boxShadow:
+            "0 0 30px rgba(0,0,0,0.2)",
+        }}
+      >
 
-  <h2
-    style={{
-      marginBottom: "24px",
-      fontSize: "30px",
-      fontWeight: "800",
-    }}
-  >
+        <h2
+          style={{
+            marginBottom: "24px",
+            fontSize: "30px",
+            fontWeight: "800",
+          }}
+        >
 
-    ✨ Create Assignment
+          ✨ Create Assignment
 
-  </h2>
+        </h2>
 
-  <div
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      gap: "20px",
-    }}
-  >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "20px",
+          }}
+        >
 
-    <input
-      placeholder="Assignment Title"
-      value={title}
-      onChange={(e) =>
-        setTitle(e.target.value)
-      }
-      className="auth-input"
-      style={{
-        padding: "18px",
-        borderRadius: "18px",
-        fontSize: "16px",
-      }}
-    />
+          <input
+            placeholder="Assignment Title"
+            value={title}
+            onChange={(e) =>
+              setTitle(e.target.value)
+            }
+            className="auth-input"
+            style={{
+              padding: "18px",
+              borderRadius: "18px",
+              fontSize: "16px",
+            }}
+          />
 
-    <textarea
-      placeholder="Assignment Description"
-      value={description}
-      onChange={(e) =>
-        setDescription(e.target.value)
-      }
-      className="auth-input"
-      rows={6}
-      style={{
-        padding: "18px",
-        borderRadius: "18px",
-        fontSize: "16px",
-      }}
-    />
+          <textarea
+            placeholder="Assignment Description"
+            value={description}
+            onChange={(e) =>
+              setDescription(e.target.value)
+            }
+            className="auth-input"
+            rows={6}
+            style={{
+              padding: "18px",
+              borderRadius: "18px",
+              fontSize: "16px",
+            }}
+          />
 
-    <input
-      type="date"
-      value={deadline}
-      onChange={(e) =>
-        setDeadline(e.target.value)
-      }
-      className="auth-input"
-      style={{
-        padding: "18px",
-        borderRadius: "18px",
-      }}
-    />
+          <input
+            type="date"
+            value={deadline}
+            onChange={(e) =>
+              setDeadline(e.target.value)
+            }
+            className="auth-input"
+            style={{
+              padding: "18px",
+              borderRadius: "18px",
+            }}
+          />
 
-    <button
-      onClick={createAssignment}
-      className="auth-btn"
-      style={{
-        padding: "18px",
-        borderRadius: "18px",
-        fontSize: "18px",
-        fontWeight: "700",
-      }}
-    >
+          {/* ================= FILE ================= */}
 
-      ➕ Create Assignment
+          <input
+            type="file"
+            onChange={(e) =>
+              setAssignmentFile(
+                e.target.files[0]
+              )
+            }
+            style={{
+              padding: "12px",
+            }}
+          />
 
-    </button>
+          <button
+            onClick={createAssignment}
+            className="auth-btn"
+            style={{
+              padding: "18px",
+              borderRadius: "18px",
+              fontSize: "18px",
+              fontWeight: "700",
+            }}
+          >
 
-  </div>
+            ➕ Create Assignment
 
-</div>
+          </button>
+
+        </div>
+
+      </div>
 
       {/* ================= LIST ================= */}
 
@@ -273,6 +332,47 @@ export default function TeacherAssignments() {
                 }
 
               </p>
+
+              {/* ================= FILE BUTTON ================= */}
+
+              {assignment.assignmentFile && (
+
+                <a
+
+                  href={`${import.meta.env.VITE_API_URL}${assignment.assignmentFile}`}
+
+                  target="_blank"
+
+                  rel="noreferrer"
+
+                  style={{
+
+                    display: "inline-block",
+
+                    marginTop: "18px",
+
+                    padding: "12px 18px",
+
+                    borderRadius: "14px",
+
+                    background:
+                      "linear-gradient(90deg,#00ff99,#00c3ff)",
+
+                    color: "#000",
+
+                    fontWeight: "700",
+
+                    textDecoration: "none",
+
+                  }}
+
+                >
+
+                  📄 View Assignment File
+
+                </a>
+
+              )}
 
               <div
                 style={{

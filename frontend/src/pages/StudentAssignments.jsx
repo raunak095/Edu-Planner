@@ -11,7 +11,10 @@ export default function StudentAssignments() {
   const [assignments, setAssignments] =
     useState([]);
 
-  const [fileUrl, setFileUrl] =
+  const [submissionLink, setSubmissionLink] =
+    useState({});
+
+  const [submissionFiles, setSubmissionFiles] =
     useState({});
 
   // ================= USER =================
@@ -56,13 +59,34 @@ export default function StudentAssignments() {
 
     try {
 
-      if (!fileUrl[id]) {
+      const formData =
+        new FormData();
 
-        alert(
-          "Please add submission link"
+      formData.append(
+
+        "studentName",
+
+        user?.name || "Student"
+
+      );
+
+      formData.append(
+
+        "submissionLink",
+
+        submissionLink[id] || ""
+
+      );
+
+      if (submissionFiles[id]) {
+
+        formData.append(
+
+          "submissionFile",
+
+          submissionFiles[id]
+
         );
-
-        return;
 
       }
 
@@ -70,12 +94,16 @@ export default function StudentAssignments() {
 
         `/teacher/assignments/${id}/submit`,
 
+        formData,
+
         {
 
-          studentName:
-            user?.name || "Student",
+          headers: {
 
-          fileUrl: fileUrl[id],
+            "Content-Type":
+              "multipart/form-data",
+
+          },
 
         }
 
@@ -90,6 +118,10 @@ export default function StudentAssignments() {
     } catch (error) {
 
       console.log(error);
+
+      alert(
+        "❌ Submission failed"
+      );
 
     }
 
@@ -202,29 +234,70 @@ export default function StudentAssignments() {
 
               </div>
 
+              {/* ================= ASSIGNMENT FILE ================= */}
+
+              {assignment.assignmentFile && (
+
+                <a
+
+                  href={`${import.meta.env.VITE_API_URL}${assignment.assignmentFile}`}
+
+                  target="_blank"
+
+                  rel="noreferrer"
+
+                  style={{
+
+                    display: "inline-block",
+
+                    marginTop: "20px",
+
+                    padding: "12px 18px",
+
+                    borderRadius: "14px",
+
+                    background:
+                      "linear-gradient(90deg,#00ff99,#00c3ff)",
+
+                    color: "#000",
+
+                    fontWeight: "700",
+
+                    textDecoration: "none",
+
+                  }}
+
+                >
+
+                  📄 View Assignment PDF
+
+                </a>
+
+              )}
+
               {/* ================= SUBMIT ================= */}
 
               <div
                 style={{
                   marginTop: "28px",
                   display: "flex",
-                  gap: "14px",
-                  flexWrap: "wrap",
+                  flexDirection: "column",
+                  gap: "16px",
                 }}
               >
 
                 <input
                   type="text"
-                  placeholder="Paste Drive/GitHub/File Link"
+                  placeholder="Paste Drive/GitHub Link"
                   value={
-                    fileUrl[
+                    submissionLink[
                       assignment._id
                     ] || ""
                   }
                   onChange={(e) =>
-                    setFileUrl({
+                    setSubmissionLink({
 
-                      ...fileUrl,
+                      ...submissionLink,
 
                       [assignment._id]:
                         e.target.value,
@@ -232,10 +305,22 @@ export default function StudentAssignments() {
                     })
                   }
                   className="auth-input"
-                  style={{
-                    flex: 1,
-                    minWidth: "260px",
-                  }}
+                />
+
+                {/* ================= FILE ================= */}
+
+                <input
+                  type="file"
+                  onChange={(e) =>
+                    setSubmissionFiles({
+
+                      ...submissionFiles,
+
+                      [assignment._id]:
+                        e.target.files[0],
+
+                    })
+                  }
                 />
 
                 <button
@@ -247,7 +332,7 @@ export default function StudentAssignments() {
                   className="auth-btn"
                 >
 
-                  📤 Submit
+                  📤 Submit Assignment
 
                 </button>
 
