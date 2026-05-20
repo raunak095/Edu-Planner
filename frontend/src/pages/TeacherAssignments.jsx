@@ -23,6 +23,14 @@ export default function TeacherAssignments() {
   const [assignments, setAssignments] =
     useState([]);
 
+  // ================= GRADING =================
+
+  const [marks, setMarks] =
+    useState({});
+
+  const [feedback, setFeedback] =
+    useState({});
+
   // ================= LOAD =================
 
   useEffect(() => {
@@ -46,6 +54,52 @@ export default function TeacherAssignments() {
     } catch (error) {
 
       console.log(error);
+
+    }
+
+  };
+
+  // ================= GRADE =================
+
+  const gradeSubmission = async (
+
+    assignmentId,
+
+    submissionId
+
+  ) => {
+
+    try {
+
+      await API.put(
+
+        `/teacher/assignments/${assignmentId}/grade/${submissionId}`,
+
+        {
+
+          marks:
+            marks[submissionId] || 0,
+
+          feedback:
+            feedback[submissionId] || "",
+
+        }
+
+      );
+
+      alert(
+        "✅ Submission Graded"
+      );
+
+      fetchAssignments();
+
+    } catch (error) {
+
+      console.log(error);
+
+      alert(
+        "❌ Grading Failed"
+      );
 
     }
 
@@ -225,11 +279,6 @@ export default function TeacherAssignments() {
               setTitle(e.target.value)
             }
             className="auth-input"
-            style={{
-              padding: "18px",
-              borderRadius: "18px",
-              fontSize: "16px",
-            }}
           />
 
           <textarea
@@ -240,11 +289,6 @@ export default function TeacherAssignments() {
             }
             className="auth-input"
             rows={6}
-            style={{
-              padding: "18px",
-              borderRadius: "18px",
-              fontSize: "16px",
-            }}
           />
 
           <input
@@ -254,10 +298,6 @@ export default function TeacherAssignments() {
               setDeadline(e.target.value)
             }
             className="auth-input"
-            style={{
-              padding: "18px",
-              borderRadius: "18px",
-            }}
           />
 
           {/* ================= FILE ================= */}
@@ -269,20 +309,11 @@ export default function TeacherAssignments() {
                 e.target.files[0]
               )
             }
-            style={{
-              padding: "12px",
-            }}
           />
 
           <button
             onClick={createAssignment}
             className="auth-btn"
-            style={{
-              padding: "18px",
-              borderRadius: "18px",
-              fontSize: "18px",
-              fontWeight: "700",
-            }}
           >
 
             ➕ Create Assignment
@@ -299,7 +330,7 @@ export default function TeacherAssignments() {
         style={{
           marginTop: "28px",
           display: "grid",
-          gap: "20px",
+          gap: "24px",
         }}
       >
 
@@ -311,7 +342,7 @@ export default function TeacherAssignments() {
               className="card"
               style={{
                 borderRadius: "24px",
-                padding: "24px",
+                padding: "28px",
               }}
             >
 
@@ -321,7 +352,7 @@ export default function TeacherAssignments() {
 
               <p
                 style={{
-                  marginTop: "10px",
+                  marginTop: "12px",
                   opacity: 0.8,
                   lineHeight: "1.7",
                 }}
@@ -376,7 +407,7 @@ export default function TeacherAssignments() {
 
               <div
                 style={{
-                  marginTop: "16px",
+                  marginTop: "18px",
                   display: "flex",
                   justifyContent:
                     "space-between",
@@ -403,6 +434,287 @@ export default function TeacherAssignments() {
                 </p>
 
               </div>
+
+              {/* ================= SUBMISSIONS ================= */}
+
+              {assignment.submissions
+                .length > 0 && (
+
+                <div
+                  style={{
+                    marginTop: "28px",
+                  }}
+                >
+
+                  <h3
+                    style={{
+                      marginBottom: "20px",
+                    }}
+                  >
+
+                    📥 Student Submissions
+
+                  </h3>
+
+                  <div
+                    style={{
+                      display: "grid",
+                      gap: "20px",
+                    }}
+                  >
+
+                    {assignment.submissions.map(
+                      (
+                        submission
+                      ) => (
+
+                        <div
+                          key={
+                            submission._id
+                          }
+                          style={{
+                            padding: "22px",
+                            borderRadius:
+                              "20px",
+                            background:
+                              "rgba(255,255,255,0.05)",
+                            border:
+                              "1px solid rgba(255,255,255,0.06)",
+                          }}
+                        >
+
+                          <h4>
+
+                            👨‍🎓
+                            {" "}
+
+                            {
+                              submission.studentName
+                            }
+
+                          </h4>
+
+                          {/* ================= FILE ================= */}
+
+                          {submission.submissionFile && (
+
+                            <a
+
+                              href={`${import.meta.env.VITE_API_URL}${submission.submissionFile}`}
+
+                              target="_blank"
+
+                              rel="noreferrer"
+
+                              style={{
+
+                                display:
+                                  "inline-block",
+
+                                marginTop:
+                                  "14px",
+
+                                padding:
+                                  "10px 16px",
+
+                                borderRadius:
+                                  "12px",
+
+                                background:
+                                  "linear-gradient(90deg,#00ff99,#00c3ff)",
+
+                                color:
+                                  "#000",
+
+                                fontWeight:
+                                  "700",
+
+                                textDecoration:
+                                  "none",
+
+                              }}
+
+                            >
+
+                              📄 Open Submission
+
+                            </a>
+
+                          )}
+
+                          {/* ================= LINK ================= */}
+
+                          {submission.submissionLink && (
+
+                            <div
+                              style={{
+                                marginTop:
+                                  "14px",
+                              }}
+                            >
+
+                              <a
+
+                                href={
+                                  submission.submissionLink
+                                }
+
+                                target="_blank"
+
+                                rel="noreferrer"
+
+                              >
+
+                                🔗 View Submitted Link
+
+                              </a>
+
+                            </div>
+
+                          )}
+
+                          {/* ================= MARKS ================= */}
+
+                          <div
+                            style={{
+                              marginTop:
+                                "20px",
+                              display:
+                                "flex",
+                              flexDirection:
+                                "column",
+                              gap: "14px",
+                            }}
+                          >
+
+                            <input
+                              type="number"
+                              placeholder="Enter Marks"
+                              value={
+                                marks[
+                                  submission._id
+                                ] || ""
+                              }
+                              onChange={(
+                                e
+                              ) =>
+                                setMarks({
+
+                                  ...marks,
+
+                                  [submission._id]:
+                                    e.target
+                                      .value,
+
+                                })
+                              }
+                              className="auth-input"
+                            />
+
+                            <textarea
+                              placeholder="Enter Feedback"
+                              value={
+                                feedback[
+                                  submission._id
+                                ] || ""
+                              }
+                              onChange={(
+                                e
+                              ) =>
+                                setFeedback({
+
+                                  ...feedback,
+
+                                  [submission._id]:
+                                    e.target
+                                      .value,
+
+                                })
+                              }
+                              className="auth-input"
+                              rows={4}
+                            />
+
+                            <button
+                              onClick={() =>
+                                gradeSubmission(
+
+                                  assignment._id,
+
+                                  submission._id
+
+                                )
+                              }
+                              className="auth-btn"
+                            >
+
+                              ✅ Save Grade
+
+                            </button>
+
+                            {/* ================= SHOW GRADE ================= */}
+
+                            {(submission.marks >
+                              0 ||
+
+                              submission.feedback) && (
+
+                              <div
+                                style={{
+                                  marginTop:
+                                    "12px",
+                                  padding:
+                                    "16px",
+                                  borderRadius:
+                                    "16px",
+                                  background:
+                                    "rgba(0,255,170,0.08)",
+                                }}
+                              >
+
+                                <p>
+
+                                  🏆 Marks:
+                                  {" "}
+
+                                  {
+                                    submission.marks
+                                  }
+
+                                </p>
+
+                                <p
+                                  style={{
+                                    marginTop:
+                                      "10px",
+                                  }}
+                                >
+
+                                  💬 Feedback:
+                                  {" "}
+
+                                  {
+                                    submission.feedback
+                                  }
+
+                                </p>
+
+                              </div>
+
+                            )}
+
+                          </div>
+
+                        </div>
+
+                      )
+                    )}
+
+                  </div>
+
+                </div>
+
+              )}
 
             </div>
 
