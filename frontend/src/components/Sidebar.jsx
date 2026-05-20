@@ -174,6 +174,14 @@ export default function Sidebar({ role }) {
           >
             🗺️ Roadmap
           </div>
+          <div
+  className="menu-item"
+  onClick={() =>
+    navigate("/student/assignments")
+  }
+>
+  📚 Assignments
+</div>
 
           <div
             className="menu-item"
@@ -300,6 +308,14 @@ export default function Sidebar({ role }) {
           >
             📚 Courses
           </div>
+          <div
+  className="menu-item"
+  onClick={() =>
+    navigate("/teacher/assignments")
+  }
+>
+  📚 Assignments
+</div>
 
           <div
             className="menu-item"

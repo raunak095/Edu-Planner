@@ -18,6 +18,7 @@ import StudentRoadmap from "./pages/StudentRoadmap";
 import StudentAnnouncements from "./pages/StudentAnnouncements";
 import StudentSettings from "./pages/StudentSettings";
 import StudentNotes from "./pages/StudentNotes";
+import StudentAssignments from "./pages/StudentAssignments";
 
 /* ================= NEW REALTIME CHAT ================= */
 
@@ -30,6 +31,7 @@ import TeacherQuizGenerator from "./pages/TeacherQuizGenerator";
 import TeacherCourses from "./pages/TeacherCourses";
 import TeacherUploads from "./pages/TeacherUploads";
 import TeacherAnnouncements from "./pages/TeacherAnnouncements";
+import TeacherAssignments from "./pages/TeacherAssignments";
 
 /* ================= ADMIN PAGES ================= */
 
@@ -162,6 +164,16 @@ function App() {
     </ProtectedRoute>
   }
 />
+<Route
+  path="/student/assignments"
+  element={
+    <ProtectedRoute
+      allowedRole="student"
+    >
+      <StudentAssignments />
+    </ProtectedRoute>
+  }
+/>
 
         {/* ================= TEACHER ROUTES ================= */}
 
@@ -219,6 +231,16 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+  path="/teacher/assignments"
+  element={
+    <ProtectedRoute
+      allowedRole="teacher"
+    >
+      <TeacherAssignments />
+    </ProtectedRoute>
+  }
+/>
 
         {/* ================= ADMIN ROUTES ================= */}
 
