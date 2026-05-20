@@ -30,6 +30,8 @@ export const createAssignment =
 
       }
 
+      // ================= CREATE =================
+
       const assignment =
         await Assignment.create({
 
@@ -115,6 +117,17 @@ export const submitAssignment =
           req.params.id
         );
 
+      if (!assignment) {
+
+        return res.status(404).json({
+
+          message:
+            "Assignment not found",
+
+        });
+
+      }
+
       // ================= FILE =================
 
       let submissionFile = "";
@@ -125,6 +138,8 @@ export const submitAssignment =
           `/uploads/${req.file.filename}`;
 
       }
+
+      // ================= PUSH =================
 
       assignment.submissions.push({
 
@@ -153,6 +168,96 @@ export const submitAssignment =
 
         message:
           "Submission failed",
+
+      });
+
+    }
+
+  };
+
+// ================= GRADE SUBMISSION =================
+
+export const gradeSubmission =
+  async (req, res) => {
+
+    try {
+
+      const {
+
+        assignmentId,
+
+        submissionId,
+
+      } = req.params;
+
+      const {
+
+        marks,
+
+        feedback,
+
+      } = req.body;
+
+      // ================= FIND ASSIGNMENT =================
+
+      const assignment =
+        await Assignment.findById(
+          assignmentId
+        );
+
+      if (!assignment) {
+
+        return res.status(404).json({
+
+          message:
+            "Assignment not found",
+
+        });
+
+      }
+
+      // ================= FIND SUBMISSION =================
+
+      const submission =
+        assignment.submissions.id(
+          submissionId
+        );
+
+      if (!submission) {
+
+        return res.status(404).json({
+
+          message:
+            "Submission not found",
+
+        });
+
+      }
+
+      // ================= UPDATE =================
+
+      submission.marks = marks;
+
+      submission.feedback =
+        feedback;
+
+      await assignment.save();
+
+      res.json({
+
+        message:
+          "Submission graded successfully",
+
+      });
+
+    } catch (error) {
+
+      console.log(error);
+
+      res.status(500).json({
+
+        message:
+          "Grading failed",
 
       });
 

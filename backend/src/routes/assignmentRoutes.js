@@ -8,6 +8,8 @@ import {
 
   submitAssignment,
 
+  gradeSubmission,
+
 } from "../controllers/assignmentController.js";
 
 import upload from "../middleware/uploadMiddleware.js";
@@ -29,8 +31,11 @@ router.post(
 // ================= GET ASSIGNMENTS =================
 
 router.get(
+
   "/",
+
   getAssignments
+
 );
 
 // ================= SUBMIT ASSIGNMENT =================
@@ -42,6 +47,16 @@ router.post(
   upload.single("submissionFile"),
 
   submitAssignment
+
+);
+
+// ================= GRADE SUBMISSION =================
+
+router.put(
+
+  "/:assignmentId/grade/:submissionId",
+
+  gradeSubmission
 
 );
 
