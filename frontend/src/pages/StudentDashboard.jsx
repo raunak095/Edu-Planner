@@ -14,7 +14,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 const socket = io(
-  "https://edu-planner-backrnd.onrender.com",
+  import.meta.env.VITE_SOCKET_URL,
   {
     transports: ["websocket"],
   }
