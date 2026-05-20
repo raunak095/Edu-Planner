@@ -1,3 +1,5 @@
+
+
 import { useEffect, useState } from "react";
 
 import DarkModeToggle from "./DarkModeToggle";
@@ -33,11 +35,9 @@ export default function Navbar() {
 
   useEffect(() => {
 
-    if (!user?._id) return;
-
     loadNotifications();
 
-    // ================= REALTIME NOTIFICATIONS =================
+    // ================= REALTIME =================
 
     socket.on(
       "new-notification",
@@ -64,14 +64,14 @@ export default function Navbar() {
 
   }, []);
 
-  // ================= FETCH NOTIFICATIONS =================
+  // ================= FETCH ANNOUNCEMENTS =================
 
   const loadNotifications = async () => {
 
     try {
 
       const res = await API.get(
-        `/notifications/${user._id}`
+        "/announcements"
       );
 
       setNotifications(res.data);
@@ -84,32 +84,10 @@ export default function Navbar() {
 
   };
 
-  // ================= UNREAD COUNT =================
+  // ================= COUNT =================
 
   const unreadCount =
-    notifications.filter(
-      (n) => !n.read
-    ).length;
-
-  // ================= MARK AS READ =================
-
-  const markAsRead = async (id) => {
-
-    try {
-
-      await API.put(
-        `/notifications/${id}/read`
-      );
-
-      loadNotifications();
-
-    } catch (error) {
-
-      console.log(error);
-
-    }
-
-  };
+    notifications.length;
 
   return (
 
@@ -248,21 +226,12 @@ export default function Navbar() {
 
                   <div
                     key={n._id}
-                    onClick={() =>
-                      markAsRead(n._id)
-                    }
                     style={{
                       padding: "14px",
                       marginBottom: "12px",
                       borderRadius: "16px",
-                      background: n.read
-
-                        ? "rgba(255,255,255,0.05)"
-
-                        : "linear-gradient(135deg, rgba(0,255,170,0.12), rgba(0,195,255,0.12))",
-
-                      cursor: "pointer",
-
+                      background:
+                        "linear-gradient(135deg, rgba(0,255,170,0.12), rgba(0,195,255,0.12))",
                       transition: "0.3s ease",
                     }}
                   >
